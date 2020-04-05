@@ -5,3 +5,5 @@ authors = ["yutaodou@gmail.com"]
 edition = "2018"
 
 [dependencies]
+rusqlite = "0.21.0"
+time = "0.2.9"

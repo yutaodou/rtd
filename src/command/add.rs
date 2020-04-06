@@ -23,7 +23,7 @@ impl<'a> Command for Add<'a> {
         
         let new_task = Task::new(self.args[2].clone());
         let result = storage::add(&new_task)?;
-        println!("Id: {}, title: {}", result.id, result.title);
+        println!("Id: {}, title: {}, done: {}", result.id, result.title, result.done);
         Ok(())
     }
 }

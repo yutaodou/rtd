@@ -1,10 +1,10 @@
 use crate::task::Task;
 
-use rusqlite::{params, Connection};
+use rusqlite::{params, Connection, NO_PARAMS};
 
 const DB_FILE_PATH: &str = "./todo";
 
-pub fn add(task: &Task) -> Result<(), &'static str> {
+pub fn add(task: &Task) -> Result<Task, &'static str> {
     let conn = Connection::open(&DB_FILE_PATH).unwrap();
     conn.execute(
         "CREATE TABLE IF NOT EXISTS todo  (
@@ -17,7 +17,16 @@ pub fn add(task: &Task) -> Result<(), &'static str> {
 
     conn.execute("INSERT INTO todo (title) VALUES (?1)", params![task.title])
         .unwrap();
-    Ok(())
+    
+    let mut stmt = conn.prepare("SELECT id, title FROM todo ORDER BY id DESC LIMIT 1").unwrap();
+    let todo = stmt.query_row(params![], |row| {
+        Ok(Task {
+            id: row.get(0)?,
+            title: row.get(1)?
+        })
+    }).unwrap();
+
+    Ok(todo)
 }
 
 pub fn get_all() -> Result<Vec<Task>, &'static str> {

@@ -22,7 +22,8 @@ impl<'a> Command for Add<'a> {
     fn exec(self: &Self) -> Result<(), &'static str> {
         
         let new_task = Task::new(self.args[2].clone());
-        storage::add(&new_task)?;
+        let result = storage::add(&new_task)?;
+        println!("Id: {}, title: {}", result.id, result.title);
         Ok(())
     }
 }

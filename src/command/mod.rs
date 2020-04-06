@@ -1,9 +1,11 @@
 mod add;
 mod cmd;
 mod list;
+mod done;
 
 pub use add::Add;
 pub use list::List;
+pub use done::Done;
 
 pub trait Command {
     fn exec(self: &Self) -> Result<(), &'static str>;

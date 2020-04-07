@@ -10,7 +10,7 @@ pub fn init_database() {
         "CREATE TABLE IF NOT EXISTS todo  (
                   id              INTEGER PRIMARY KEY,
                   title           TEXT NOT NULL,
-                  done            INTERGER DEFAULT 0
+                  done            INTEGER DEFAULT 0
                   )",
         params![],
     )

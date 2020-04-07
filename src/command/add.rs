@@ -20,10 +20,12 @@ impl<'a> Add<'a> {
 
 impl<'a> Command for Add<'a> {
     fn exec(self: &Self) -> Result<(), &'static str> {
-        
         let new_task = Task::new(self.args[2].clone());
         let result = storage::add(&new_task)?;
-        println!("Id: {}, title: {}, done: {}", result.id, result.title, result.done);
+        println!(
+            "Id: {}, title: {}, done: {}",
+            result.id, result.title, result.done
+        );
         Ok(())
     }
 }

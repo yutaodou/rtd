@@ -13,12 +13,15 @@ impl List {
 
 impl Command for List {
     fn exec(self: &Self) -> Result<(), &'static str> {
-       let tasks = storage::get_all().unwrap();
-       for task in tasks.iter() {
-           if !task.done {
-               println!("Id: {}, title: {}, done: {}", task.id, task.title, task.done)
-           }
-       }
+        let tasks = storage::get_all().unwrap();
+        for task in tasks.iter() {
+            if !task.done {
+                println!(
+                    "Id: {}, title: {}, done: {}",
+                    task.id, task.title, task.done
+                )
+            }
+        }
 
         Ok(())
     }

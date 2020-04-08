@@ -1,6 +1,6 @@
 #rtd
 
-A command line task management tool
+A command line task management tool to practice rust
 
 # Features
 **Add task**

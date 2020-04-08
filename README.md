@@ -1,8 +1,8 @@
-#rtd
+# rtd
 
 A command line task management tool to practice rust
 
-# Features
+## Features
 **Add task**
 
 ```

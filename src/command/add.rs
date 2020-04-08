@@ -2,31 +2,38 @@ use std::result::Result;
 
 use crate::command::Command;
 use crate::storage;
-use crate::task::Task;
+use crate::task::{Priority, Task};
 
 #[derive(Debug)]
 pub struct Add {
     title: String,
     list: String,
+    priority: Priority,
 }
 
 impl Add {
     fn parse(args: &[String]) -> Add {
         let mut title = String::new();
-        let mut list = String::new();
+        let mut list = String::from("inbox");
+        let mut priority = Priority::Medium;
         for arg in args {
             if arg.starts_with("~") && arg.len() > 1 {
                 list = arg.get(1..arg.len()).unwrap().to_string();
+            } else if arg.starts_with("!") && arg.len() > 1 {
+                priority = arg
+                    .get(1..arg.len())
+                    .map(|p| Priority::from(p).unwrap())
+                    .unwrap();
             } else {
                 title = arg.clone();
             }
         }
 
-        if list.is_empty() {
-            list = "inbox".to_string();
+        Add {
+            title,
+            list,
+            priority,
         }
-
-        Add { title, list }
     }
 
     pub fn new(args: &[String]) -> Result<Add, &'static str> {
@@ -39,7 +46,7 @@ impl Add {
 }
 
 impl Command for Add {
-    fn exec(self: &Self) -> Result<(), &'static str> {
+    fn run(self: &Self) -> Result<(), &'static str> {
         let new_task = Task::new(self.title.clone(), self.list.clone());
         let result = storage::add(&new_task)?;
         println!("{:?}", result);
@@ -49,19 +56,22 @@ impl Command for Add {
 
 #[cfg(test)]
 mod test {
-    use super::Add;
+    use crate::command::Add;
+    use crate::task::Priority;
 
     #[test]
-    fn test_new() {
+    fn test_parse() {
         let args = vec![
             "add".to_string(),
             "todo-title".to_string(),
             "~list".to_string(),
+            "!L".to_string(),
         ];
 
         let add = Add::new(args.as_slice()).unwrap();
 
         assert_eq!(add.title, "todo-title");
         assert_eq!(add.list, "list");
+        assert_eq!(add.priority, Priority::Low);
     }
 }

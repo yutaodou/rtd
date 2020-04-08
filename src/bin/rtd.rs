@@ -7,19 +7,20 @@ use rtd::command::Command;
 use rtd::command::Done;
 use rtd::command::List;
 
-fn main() {
+fn main() -> Result<(), &'static str> {
     let args: Vec<String> = env::args().skip(1).collect();
 
-    match args.first().unwrap().as_str() {
+    match args.first().unwrap().to_lowercase().as_str() {
         "add" => {
-            Add::new(&args).unwrap().exec().unwrap();
+            Add::new(&args)?.run()?;
         }
         "list" => {
-            List::new().unwrap().exec().unwrap();
+            List::new()?.run()?;
         }
         "done" => {
-            Done::new(&args).unwrap().exec().unwrap();
+            Done::new(&args)?.run()?;
         }
         _ => panic!("wrong"),
     }
+    Ok(())
 }

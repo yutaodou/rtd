@@ -8,7 +8,7 @@ pub use done::Done;
 pub use list::List;
 
 pub trait Command {
-    fn exec(self: &Self) -> Result<(), &'static str>;
+    fn run(self: &Self) -> Result<(), &'static str>;
 }
 
 // pub fn parse<'a>(args: &'a [String]) -> Box<dyn Command> {

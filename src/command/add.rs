@@ -1,8 +1,10 @@
+use std::io::stdout;
 use std::result::Result;
 
 use crate::command::Command;
 use crate::storage;
 use crate::task::{Priority, Task};
+use crate::view::single;
 
 #[derive(Debug)]
 pub struct Add {
@@ -49,7 +51,7 @@ impl Command for Add {
     fn run(self: &Self) -> Result<(), &'static str> {
         let new_task = Task::new(self.title.clone(), self.list.clone());
         let result = storage::add(&new_task)?;
-        println!("{:?}", result);
+        single::render(&result, &mut stdout())?;
         Ok(())
     }
 }

@@ -1,5 +1,7 @@
 use crate::command::Command;
 use crate::storage;
+use crate::view::single;
+use std::io::stdout;
 use std::result::Result;
 
 pub struct Done<'a> {
@@ -19,10 +21,7 @@ impl<'a> Done<'a> {
 impl<'a> Command for Done<'a> {
     fn run(self: &Self) -> Result<(), &'static str> {
         let result = storage::done(self.args[1].parse().unwrap())?;
-        println!(
-            "Id: {}, title: {}, done: {}",
-            result.id, result.title, result.done
-        );
+        single::render(&result, &mut stdout())?;
         Ok(())
     }
 }

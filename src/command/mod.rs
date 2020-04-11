@@ -10,8 +10,3 @@ pub use list::List;
 pub trait Command {
     fn run(self: &Self) -> Result<(), &'static str>;
 }
-
-// pub fn parse<'a>(args: &'a [String]) -> Box<dyn Command> {
-//     let cmd = Add::new(args);
-//     Box::new(cmd)
-// }

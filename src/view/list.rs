@@ -1,6 +1,8 @@
-use crate::task::Task;
-
 use std::io::Write;
+
+use ansi_term::Style;
+
+use crate::task::Task;
 
 pub struct Render {
     pub tasks: Vec<Task>,
@@ -23,14 +25,12 @@ impl Render {
     }
 
     fn render_single<W: Write>(self: &Self, w: &mut W, task: &Task) {
-        let done = if task.done { "x" } else { " " };
-        let result = format!(
-            "{:>4} [{}] {} !{}",
-            task.id,
-            done,
-            task.title,
-            task.priority.to_string()
-        );
-        writeln!(w, "{}", result).unwrap();
+        let title = if task.done {
+            Style::new().strikethrough().paint(&task.title)
+        } else {
+            Style::default().paint(&task.title)
+        };
+
+        writeln!(w, "{:>4}. {} !{}", task.id, title, Style::default().paint(task.priority.to_string())).unwrap();
     }
 }

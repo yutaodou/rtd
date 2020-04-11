@@ -7,3 +7,4 @@ edition = "2018"
 [dependencies]
 rusqlite = "0.21.0"
 time = "0.2.9"
+ansi_term = "0.12"

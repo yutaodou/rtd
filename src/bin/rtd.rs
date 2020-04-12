@@ -17,27 +17,33 @@ fn main() -> Result<(), &'static str> {
         .version("0.1")
         .author("DYT. <yutaodou@gmail.com>")
         .about("Manage to-dos in command line")
-        .subcommand(SubCommand::with_name("list")
-            .about("Show tasks in all lists")
-            .arg(Arg::with_name("name")
-                .short("n")
-                .long("name")
-                .help("Show tasks from specified list only")
-                .takes_value(true)
-                .multiple(false))
-            .arg(Arg::with_name("all")
-                .short("a")
-                .long("all")
-                .help("Show tasks in all lists including completed tasks")
-                .conflicts_with("done")
-                .takes_value(false))
-            .arg(Arg::with_name("done")
-                .short("d")
-                .long("done")
-                .conflicts_with("all")
-                .help("Show completed tasks only from all lists")
-                .takes_value(false)
-            )
+        .subcommand(
+            SubCommand::with_name("list")
+                .about("Lists tasks")
+                .arg(
+                    Arg::with_name("name")
+                        .required(false)
+                        .index(1)
+                        .help("Show tasks from specified list")
+                        .takes_value(true)
+                        .multiple(false),
+                )
+                .arg(
+                    Arg::with_name("all")
+                        .short("a")
+                        .long("all")
+                        .help("Show tasks in all lists including completed tasks")
+                        .conflicts_with("done")
+                        .takes_value(false),
+                )
+                .arg(
+                    Arg::with_name("done")
+                        .short("d")
+                        .long("done")
+                        .conflicts_with("all")
+                        .help("Show completed tasks only from all lists")
+                        .takes_value(false),
+                ),
         );
 
     match args.first().unwrap().to_lowercase().as_str() {
@@ -45,7 +51,8 @@ fn main() -> Result<(), &'static str> {
             Add::new(&args)?.run()?;
         }
         "list" => {
-            let list_opts = parser.get_matches()
+            let list_opts = parser
+                .get_matches()
                 .subcommand_matches("list")
                 .unwrap()
                 .to_owned();

@@ -8,7 +8,7 @@ pub struct Render<'a> {
     pub tasks: Vec<&'a Task>,
 }
 
-impl <'a> Render<'a> {
+impl<'a> Render<'a> {
     pub fn render<W: Write>(self: &Self, w: &mut W) -> Result<(), &'static str> {
         let mut lists: Vec<&str> = self.tasks.iter().map(|task| task.list.as_str()).collect();
         lists.dedup();
@@ -30,6 +30,13 @@ impl <'a> Render<'a> {
             Style::default().paint(&task.title)
         };
 
-        writeln!(w, "{:>4}. {} !{}", task.id, title, Style::default().paint(task.priority.to_string())).unwrap();
+        writeln!(
+            w,
+            "{:>4}. {} !{}",
+            task.id,
+            title,
+            Style::default().paint(task.priority.to_string())
+        )
+        .unwrap();
     }
 }

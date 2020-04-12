@@ -23,6 +23,7 @@ impl<'a> Command for List<'a> {
     fn run(self: &Self) -> Result<(), &'static str> {
         let tasks = storage::get_all().unwrap();
         let mut result: Vec<&Task>;
+
         if self.opts.is_present("done") {
             result = tasks.iter().filter(|task| task.done).collect();
         } else if !self.opts.is_present("all") {
@@ -32,8 +33,12 @@ impl<'a> Command for List<'a> {
         }
 
         result = match self.opts.value_of("name") {
-            Some(name) => result.iter().filter(|task| task.list == name).map(|task| *task).collect(),
-            None => result
+            Some(name) => result
+                .iter()
+                .filter(|task| task.list == name)
+                .map(|task| *task)
+                .collect(),
+            None => result,
         };
 
         let render = list::Render { tasks: result };

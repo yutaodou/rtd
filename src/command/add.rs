@@ -1,5 +1,6 @@
 use std::io::stdout;
 use std::result::Result;
+use clap::ArgMatches;
 
 use crate::command::Command;
 use crate::storage;
@@ -14,11 +15,11 @@ pub struct Add {
 }
 
 impl Add {
-    fn parse(args: &[String]) -> Add {
+    fn parse(args: &ArgMatches) -> Add {
         let mut title = String::new();
         let mut list = String::from("inbox");
         let mut priority = Priority::Medium;
-        for arg in args {
+        args.values_of("INPUT").unwrap().for_each(|arg| {
             if arg.starts_with("~") && arg.len() > 1 {
                 list = arg.get(1..arg.len()).unwrap().to_string();
             } else if arg.starts_with("!") && arg.len() > 1 {
@@ -27,9 +28,9 @@ impl Add {
                     .map(|p| Priority::from(p).unwrap())
                     .unwrap();
             } else {
-                title = arg.clone();
+                title = arg.to_string();
             }
-        }
+        });
 
         Add {
             title,
@@ -38,12 +39,8 @@ impl Add {
         }
     }
 
-    pub fn new(args: &[String]) -> Result<Add, &'static str> {
-        if args.len() < 2 {
-            Err("expect at least 2 arguments: 'rtd add <to do>'")
-        } else {
-            Ok(Add::parse(args))
-        }
+    pub fn new(args: &ArgMatches) -> Result<Add, &'static str> {
+        Ok(Add::parse(args))
     }
 }
 
@@ -53,27 +50,5 @@ impl Command for Add {
         let result = storage::add(&new_task)?;
         single::render(&result, &mut stdout())?;
         Ok(())
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use crate::command::Add;
-    use crate::task::Priority;
-
-    #[test]
-    fn test_parse() {
-        let args = vec![
-            "add".to_string(),
-            "todo-title".to_string(),
-            "~list".to_string(),
-            "!L".to_string(),
-        ];
-
-        let add = Add::new(args.as_slice()).unwrap();
-
-        assert_eq!(add.title, "todo-title");
-        assert_eq!(add.list, "list");
-        assert_eq!(add.priority, Priority::Low);
     }
 }

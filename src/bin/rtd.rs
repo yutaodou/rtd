@@ -1,8 +1,6 @@
 extern crate clap;
 extern crate rtd;
 
-use std::env;
-
 use clap::{App, Arg, SubCommand};
 
 use rtd::command::Add;
@@ -11,11 +9,8 @@ use rtd::command::Done;
 use rtd::command::List;
 
 fn main() -> Result<(), &'static str> {
-    let args: Vec<String> = env::args().skip(1).collect();
-
-    let parser = App::new("Rust To Do")
-        .version("0.1")
-        .author("DYT. <yutaodou@gmail.com>")
+    let opts = App::new("Rust To Do")
+        .version("v0.1")
         .about("Manage to-dos in command line")
         .subcommand(
             SubCommand::with_name("list")
@@ -44,24 +39,38 @@ fn main() -> Result<(), &'static str> {
                         .help("Show completed tasks only from all lists")
                         .takes_value(false),
                 ),
-        );
+        )
+        .subcommand(
+            SubCommand::with_name("add").about("Add a new task").arg(
+                Arg::with_name("INPUT")
+                    .help("<todo-title> ~<list> !priority")
+                    .required(true)
+                    .index(1)
+                    .takes_value(true)
+                    .multiple(true),
+            ),
+        )
+        .subcommand(
+            SubCommand::with_name("done")
+                .about("Mark task as done")
+                .arg(
+                    Arg::with_name("INPUT")
+                        .required(true)
+                        .index(1)
+                        .takes_value(true)
+                        .multiple(true),
+                ),
+        )
+        .get_matches();
 
-    match args.first().unwrap().to_lowercase().as_str() {
-        "add" => {
-            Add::new(&args)?.run()?;
+    match opts.subcommand() {
+        ("add", Some(add_opts)) => Add::new(add_opts)?.run()?,
+        ("list", Some(list_opts)) => List::new(list_opts)?.run()?,
+        ("done", Some(done_opts)) => Done::new(done_opts)?.run()?,
+        _ => {
+            println!("{}", opts.usage());
+            std::process::exit(-1);
         }
-        "list" => {
-            let list_opts = parser
-                .get_matches()
-                .subcommand_matches("list")
-                .unwrap()
-                .to_owned();
-            List::new(list_opts)?.run()?;
-        }
-        "done" => {
-            Done::new(&args)?.run()?;
-        }
-        _ => panic!("wrong"),
-    }
+    };
     Ok(())
 }

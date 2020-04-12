@@ -10,11 +10,11 @@ use crate::view::list;
 
 #[derive(Debug)]
 pub struct List<'a> {
-    opts: ArgMatches<'a>,
+    opts: &'a ArgMatches<'a>,
 }
 
 impl<'a> List<'a> {
-    pub fn new(opts: ArgMatches) -> Result<List, &'static str> {
+    pub fn new(opts: &'a ArgMatches) -> Result<List<'a>, &'static str> {
         Ok(List { opts })
     }
 }

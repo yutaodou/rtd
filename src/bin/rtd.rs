@@ -56,7 +56,6 @@ fn main() -> Result<(), &'static str> {
                 .arg(
                     Arg::with_name("INPUT")
                         .required(true)
-                        .index(1)
                         .takes_value(true)
                         .multiple(true),
                 ),

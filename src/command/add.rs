@@ -1,6 +1,6 @@
+use clap::ArgMatches;
 use std::io::stdout;
 use std::result::Result;
-use clap::ArgMatches;
 
 use crate::command::Command;
 use crate::storage;

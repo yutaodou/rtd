@@ -46,10 +46,14 @@ pub fn add(task: &Task) -> Result<Task, &'static str> {
     Ok(todo)
 }
 
-pub fn done(task_id: u32) -> Result<Task, &'static str> {
+pub fn done(task_id: u32, done: bool) -> Result<Task, &'static str> {
+    let completed = if done { 1 } else { 0 };
     let conn = Connection::open(&DB_FILE_PATH).unwrap();
-    conn.execute("UPDATE todo SET done = 1 WHERE id = (?1)", params![task_id])
-        .unwrap();
+    conn.execute(
+        "UPDATE todo SET done = (?1) WHERE id = (?2)",
+        params![completed, task_id],
+    )
+    .unwrap();
 
     let mut stmt = conn
         .prepare("SELECT id, title, done, list, priority FROM todo WHERE id = (?1)")

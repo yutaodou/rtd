@@ -1,8 +1,9 @@
 extern crate dirs;
 
-use rusqlite::{params, Connection, NO_PARAMS};
+use rusqlite::{params, Connection, Row, NO_PARAMS};
 use std::fs::DirBuilder;
 use std::path::PathBuf;
+use std::result::Result;
 
 use crate::task::Task;
 
@@ -14,7 +15,7 @@ fn database_file_path() -> PathBuf {
     path
 }
 
-pub fn init_database() {
+fn init_database() {
     let conn = open_connection();
     conn.execute(
         "CREATE TABLE IF NOT EXISTS todo  (
@@ -51,15 +52,7 @@ pub fn add(task: &Task) -> Result<Task, &'static str> {
         .prepare("SELECT id, title, done, list, priority FROM todo ORDER BY id DESC LIMIT 1")
         .unwrap();
     let todo = stmt
-        .query_row(NO_PARAMS, |row| {
-            Ok(Task::create(
-                row.get(0)?,
-                row.get(1)?,
-                row.get(2)?,
-                row.get(3)?,
-                row.get(4)?,
-            ))
-        })
+        .query_row(NO_PARAMS, |row| Ok(map_to_task(row)))
         .unwrap();
 
     Ok(todo)
@@ -78,15 +71,7 @@ pub fn done(task_id: u32, done: bool) -> Result<Task, &'static str> {
         .prepare("SELECT id, title, done, list, priority FROM todo WHERE id = (?1)")
         .unwrap();
     let todo = stmt
-        .query_row(params![task_id], |row| {
-            Ok(Task::create(
-                row.get(0)?,
-                row.get(1)?,
-                row.get(2)?,
-                row.get(3)?,
-                row.get(4)?,
-            ))
-        })
+        .query_row(params![task_id], |row| Ok(map_to_task(row)))
         .unwrap();
 
     Ok(todo)
@@ -100,15 +85,7 @@ pub fn get_all() -> Result<Vec<Task>, &'static str> {
         .prepare("SELECT id, title, done, list, priority FROM todo")
         .unwrap();
     let todo_iter = stmt
-        .query_map(NO_PARAMS, |row| {
-            Ok(Task::create(
-                row.get(0)?,
-                row.get(1)?,
-                row.get(2)?,
-                row.get(3)?,
-                row.get(4)?,
-            ))
-        })
+        .query_map(NO_PARAMS, |row| Ok(map_to_task(row)))
         .unwrap();
 
     let mut result: Vec<Task> = Vec::new();
@@ -116,4 +93,14 @@ pub fn get_all() -> Result<Vec<Task>, &'static str> {
         result.push(task.unwrap());
     }
     Ok(result)
+}
+
+fn map_to_task(row: &Row) -> Task {
+    Task::create(
+        row.get(0).unwrap(),
+        row.get(1).unwrap(),
+        row.get(2).unwrap(),
+        row.get(3).unwrap(),
+        row.get(4).unwrap(),
+    )
 }

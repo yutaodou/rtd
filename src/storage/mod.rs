@@ -1,11 +1,21 @@
+extern crate dirs;
+
 use rusqlite::{params, Connection, NO_PARAMS};
+use std::fs::DirBuilder;
+use std::path::PathBuf;
 
 use crate::task::Task;
 
-const DB_FILE_PATH: &str = "./todo";
+fn database_file_path() -> PathBuf {
+    let mut path = dirs::home_dir().unwrap();
+    path.push(".rtd");
+    path.push("database");
+    path.set_extension("data");
+    path
+}
 
 pub fn init_database() {
-    let conn = Connection::open(&DB_FILE_PATH).unwrap();
+    let conn = open_connection();
     conn.execute(
         "CREATE TABLE IF NOT EXISTS todo  (
             id              INTEGER PRIMARY KEY,
@@ -19,9 +29,18 @@ pub fn init_database() {
     .unwrap();
 }
 
+fn open_connection() -> Connection {
+    let database_file_path = database_file_path();
+    let database_file_dir = database_file_path.parent().unwrap();
+    if !database_file_dir.exists() {
+        DirBuilder::new().create(database_file_dir).unwrap();
+    }
+    Connection::open(&database_file_path).unwrap()
+}
+
 pub fn add(task: &Task) -> Result<Task, &'static str> {
     init_database();
-    let conn = Connection::open(&DB_FILE_PATH).unwrap();
+    let conn = open_connection();
     conn.execute(
         "INSERT INTO todo (title, list, priority) VALUES (?1, ?2, ?3)",
         params![task.title, task.list, task.priority.to_string()],
@@ -48,7 +67,7 @@ pub fn add(task: &Task) -> Result<Task, &'static str> {
 
 pub fn done(task_id: u32, done: bool) -> Result<Task, &'static str> {
     let completed = if done { 1 } else { 0 };
-    let conn = Connection::open(&DB_FILE_PATH).unwrap();
+    let conn = open_connection();
     conn.execute(
         "UPDATE todo SET done = (?1) WHERE id = (?2)",
         params![completed, task_id],
@@ -76,7 +95,7 @@ pub fn done(task_id: u32, done: bool) -> Result<Task, &'static str> {
 pub fn get_all() -> Result<Vec<Task>, &'static str> {
     init_database();
 
-    let conn = Connection::open(&DB_FILE_PATH).unwrap();
+    let conn = open_connection();
     let mut stmt = conn
         .prepare("SELECT id, title, done, list, priority FROM todo")
         .unwrap();

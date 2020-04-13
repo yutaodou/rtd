@@ -58,7 +58,7 @@ pub fn add(task: &Task) -> Result<Task, &'static str> {
     Ok(todo)
 }
 
-pub fn done(task_id: u32, done: bool) -> Result<Task, &'static str> {
+pub fn done(task_id: u32, done: bool) -> Result<Task, String> {
     let completed = if done { 1 } else { 0 };
     let conn = open_connection();
     conn.execute(
@@ -70,11 +70,12 @@ pub fn done(task_id: u32, done: bool) -> Result<Task, &'static str> {
     let mut stmt = conn
         .prepare("SELECT id, title, done, list, priority FROM todo WHERE id = (?1)")
         .unwrap();
-    let todo = stmt
-        .query_row(params![task_id], |row| Ok(map_to_task(row)))
-        .unwrap();
+    let todo = stmt.query_row(params![task_id], |row| Ok(map_to_task(row)));
 
-    Ok(todo)
+    match todo {
+        Ok(task) => Ok(task),
+        _ => Err(format!("Task with id '{}' not found", task_id)),
+    }
 }
 
 pub fn get_all() -> Result<Vec<Task>, &'static str> {

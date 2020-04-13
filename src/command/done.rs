@@ -29,7 +29,6 @@ impl<'a> Command for Done<'a> {
             let result = storage::done(task_id.parse().unwrap(), done).unwrap();
             single::render(&result, &mut stdout()).unwrap();
         });
-
         Ok(())
     }
 }

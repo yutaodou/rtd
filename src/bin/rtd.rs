@@ -1,14 +1,15 @@
 extern crate clap;
 extern crate rtd;
 
-use clap::{App, Arg, SubCommand};
+use clap::{App, Arg, ArgMatches, SubCommand};
+use std::process::exit;
 
 use rtd::command::Add;
 use rtd::command::Command;
 use rtd::command::Done;
 use rtd::command::List;
 
-fn main() -> Result<(), &'static str> {
+fn main() {
     let opts = App::new("Rust To Do")
         .version("v0.1")
         .about("Manage to-dos in command line")
@@ -62,14 +63,23 @@ fn main() -> Result<(), &'static str> {
         )
         .get_matches();
 
-    match opts.subcommand() {
-        ("add", Some(add_opts)) => Add::new(add_opts)?.run()?,
-        ("list", Some(list_opts)) => List::new(list_opts)?.run()?,
-        ("done", Some(done_opts)) => Done::new(done_opts)?.run()?,
-        _ => {
-            println!("{}", opts.usage());
-            std::process::exit(-1);
+    let result = run(&opts);
+
+    match result {
+        Ok(_) => exit(0),
+        Err(error) => {
+            eprintln!("{}", error);
+            eprintln!("{}",opts.usage());
+            exit(1);
         }
-    };
-    Ok(())
+    }
+}
+
+fn run(opts: &ArgMatches) -> Result<(), &'static str>{
+    match opts.subcommand() {
+        ("add", Some(add_opts)) => Add::new(add_opts)?.run(),
+        ("list", Some(list_opts)) => List::new(list_opts)?.run(),
+        ("done", Some(done_opts)) => Done::new(done_opts)?.run(),
+        _ => Err("Unsupported command."),
+    }
 }

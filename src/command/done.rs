@@ -28,13 +28,35 @@ impl<'a> Command for Done<'a> {
     }
 }
 
-fn parse(value: &str) -> Result<(u32, bool), &'static str> {
+fn parse(value: &str) -> Result<(u32, bool), String> {
     let mut task_id = value;
     let mut done = true;
     if value.starts_with("~") {
         task_id = &value[1..];
         done = false;
     };
-    let id = task_id.parse().unwrap();
-    Ok((id, done))
+    match task_id.parse() {
+        Ok(id) => Ok((id, done)),
+        Err(_) => Err(format!("Unknown task id: '{}'", task_id)),
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::command::done::parse;
+
+    #[test]
+    fn test_parse() {
+        let (id, done) = parse("~123").unwrap();
+        assert_eq!(id, 123);
+        assert_eq!(done, false);
+
+        let (id, done) = parse("123").unwrap();
+        assert_eq!(id, 123);
+        assert_eq!(done, true);
+
+        let result = parse("asdf");
+        assert_eq!(result.is_err(), true);
+        assert_eq!(result.err(), Some(String::from("Unknown task id: 'asdf'")));
+    }
 }

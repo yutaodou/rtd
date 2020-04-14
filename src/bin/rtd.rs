@@ -1,8 +1,9 @@
 extern crate clap;
 extern crate rtd;
 
-use clap::{App, Arg, ArgMatches, SubCommand};
 use std::process::exit;
+
+use clap::{App, Arg, ArgMatches, SubCommand};
 
 use rtd::command::Add;
 use rtd::command::Command;
@@ -63,9 +64,7 @@ fn main() {
         )
         .get_matches();
 
-    let result = run(&opts);
-
-    match result {
+    match run(&opts) {
         Ok(_) => exit(0),
         Err(error) => {
             eprintln!("{}", error);

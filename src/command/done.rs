@@ -12,8 +12,8 @@ pub struct Done<'a> {
 }
 
 impl<'a> Done<'a> {
-    pub fn new(args: &'a ArgMatches<'a>) -> Result<Done, &'static str> {
-        Ok(Done { args })
+    pub fn new(args: &'a ArgMatches<'a>) -> Done<'a> {
+        Done { args }
     }
 }
 

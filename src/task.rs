@@ -8,13 +8,13 @@ pub struct Task {
 }
 
 impl Task {
-    pub fn new(title: String, list: String) -> Task {
+    pub fn new(title: String, list: String, priority: Priority) -> Task {
         Task {
             id: 0,
             title,
             done: false,
             list,
-            priority: Priority::Medium,
+            priority,
         }
     }
 
@@ -29,7 +29,7 @@ impl Task {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub enum Priority {
     Low,
     High,

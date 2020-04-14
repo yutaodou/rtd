@@ -14,8 +14,8 @@ pub struct List<'a> {
 }
 
 impl<'a> List<'a> {
-    pub fn new(opts: &'a ArgMatches) -> Result<List<'a>, &'static str> {
-        Ok(List { opts })
+    pub fn new(opts: &'a ArgMatches) -> List<'a> {
+        List { opts }
     }
 }
 

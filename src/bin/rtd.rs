@@ -69,13 +69,13 @@ fn main() {
         Ok(_) => exit(0),
         Err(error) => {
             eprintln!("{}", error);
-            eprintln!("{}",opts.usage());
+            eprintln!("{}", opts.usage());
             exit(1);
         }
     }
 }
 
-fn run(opts: &ArgMatches) -> Result<(), &'static str>{
+fn run(opts: &ArgMatches) -> Result<(), &'static str> {
     match opts.subcommand() {
         ("add", Some(add_opts)) => Add::new(add_opts)?.run(),
         ("list", Some(list_opts)) => List::new(list_opts)?.run(),

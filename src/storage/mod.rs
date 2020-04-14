@@ -1,9 +1,10 @@
 extern crate dirs;
 
-use rusqlite::{params, Connection, Row, NO_PARAMS};
 use std::fs::DirBuilder;
 use std::path::PathBuf;
 use std::result::Result;
+
+use rusqlite::{params, Connection, Row, NO_PARAMS};
 
 use crate::task::Task;
 
@@ -48,14 +49,17 @@ pub fn add(task: &Task) -> Result<Task, &'static str> {
     )
     .unwrap();
 
-    let mut stmt = conn
+    let result = conn
         .prepare("SELECT id, title, done, list, priority FROM todo ORDER BY id DESC LIMIT 1")
-        .unwrap();
-    let todo = stmt
-        .query_row(NO_PARAMS, |row| Ok(map_to_task(row)))
-        .unwrap();
+        .and_then(|mut stmt| stmt.query_row(NO_PARAMS, |row| Ok(map_to_task(row))));
 
-    Ok(todo)
+    match result {
+        Ok(task) => Ok(task),
+        Err(err) => {
+            eprintln!("{}", err.to_string());
+            Err("Failed to add task")
+        }
+    }
 }
 
 pub fn done(task_id: u32, done: bool) -> Result<Task, String> {

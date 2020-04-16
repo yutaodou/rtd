@@ -5,6 +5,7 @@ use clap::ArgMatches;
 
 use crate::command::Command;
 use crate::storage;
+use crate::task::Task;
 use crate::view::single;
 
 pub struct Done<'a> {
@@ -19,13 +20,38 @@ impl<'a> Done<'a> {
 
 impl<'a> Command for Done<'a> {
     fn run(self: &Self) -> Result<(), &'static str> {
-        self.args.values_of("INPUT").unwrap().for_each(|id| {
-            let (task_id, done) = parse(id).unwrap();
-            let result = storage::done(task_id, done).unwrap();
-            single::render(&result, &mut stdout()).unwrap();
+        let results = self.args.values_of("INPUT").unwrap().map(process);
+
+        let mut has_errors = false;
+        results.for_each(|result| {
+            if result.is_ok() {
+                single::render(&result.unwrap(), &mut stdout()).unwrap();
+            } else {
+                has_errors = true;
+                println!("{}", result.unwrap_err());
+            }
         });
-        Ok(())
+
+        if false {
+            Err("")
+        } else {
+            Ok(())
+        }
     }
+}
+
+fn process(input: &str) -> Result<Task, String> {
+    parse(input)
+        .and_then(|(task_id, done)| {
+            storage::get(task_id).and_then(|mut task| {
+                task.done = done;
+                Ok(task)
+            })
+        })
+        .and_then(|task| match storage::update(&task) {
+            Ok(_) => Ok(task),
+            Err(error) => Err(error),
+        })
 }
 
 fn parse(value: &str) -> Result<(u32, bool), String> {

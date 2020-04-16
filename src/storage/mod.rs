@@ -41,11 +41,21 @@ fn open_connection() -> Connection {
     Connection::open(&database_file_path).unwrap()
 }
 
-// pub fn update(task: &Task) -> Result<(), &'static str> {
-//     init_database();
-//     let conn = open_connection();
-//     conn.execute("UPDATE todo SET title = :title, list = :list,  ")
-// }
+pub fn update(task: &Task) -> Result<(), String> {
+    init_database();
+    let conn = open_connection();
+    conn.execute_named(
+        "UPDATE todo SET title = :title, list = :list, done = :done, today = :today, priority = :priority WHERE id = :id",
+       &[
+           (":title", &task.title),
+           (":list", &task.list.as_str()),
+           (":priority", &task.priority.to_string()),
+           (":done", if task.done {&1} else {&0}),
+           (":today", &task.today),
+           (":id", &task.id),
+       ]).unwrap();
+    Ok(())
+}
 
 pub fn add(task: &Task) -> Result<Task, &'static str> {
     init_database();
@@ -73,15 +83,8 @@ pub fn add(task: &Task) -> Result<Task, &'static str> {
     }
 }
 
-pub fn done(task_id: u32, done: bool) -> Result<Task, String> {
-    let completed = if done { 1 } else { 0 };
+pub fn get(task_id: u32) -> Result<Task, String> {
     let conn = open_connection();
-    conn.execute_named(
-        "UPDATE todo SET done = :done WHERE id = :id",
-        &[(":done", &completed), (":id", &task_id)]
-    )
-    .unwrap();
-
     let mut stmt = conn.prepare("SELECT * FROM todo WHERE id = (?1)").unwrap();
     let todo = stmt.query_row(params![task_id], |row| Ok(map_to_task(row)));
 

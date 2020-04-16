@@ -23,6 +23,7 @@ fn init_database() {
             id              INTEGER PRIMARY KEY,
             title           TEXT NOT NULL,
             done            INTEGER DEFAULT 0,
+            today           TEXT DEFAULT '',
             list            TEXT DEFAULT '',
             priority        TEXT DEFAULT 'medium'
             )",
@@ -40,17 +41,27 @@ fn open_connection() -> Connection {
     Connection::open(&database_file_path).unwrap()
 }
 
+// pub fn update(task: &Task) -> Result<(), &'static str> {
+//     init_database();
+//     let conn = open_connection();
+//     conn.execute("UPDATE todo SET title = :title, list = :list,  ")
+// }
+
 pub fn add(task: &Task) -> Result<Task, &'static str> {
     init_database();
     let conn = open_connection();
-    conn.execute(
-        "INSERT INTO todo (title, list, priority) VALUES (?1, ?2, ?3)",
-        params![task.title, task.list, task.priority.to_string()],
+    conn.execute_named(
+        "INSERT INTO todo (title, list, priority) VALUES (:title, :list, :priority)",
+        &[
+            (":title", &task.title),
+            (":list", &task.list.as_str()),
+            (":priority", &task.priority.to_string()),
+        ],
     )
     .unwrap();
 
     let result = conn
-        .prepare("SELECT id, title, done, list, priority FROM todo ORDER BY id DESC LIMIT 1")
+        .prepare("SELECT * FROM todo ORDER BY id DESC LIMIT 1")
         .and_then(|mut stmt| stmt.query_row(NO_PARAMS, |row| Ok(map_to_task(row))));
 
     match result {
@@ -65,15 +76,13 @@ pub fn add(task: &Task) -> Result<Task, &'static str> {
 pub fn done(task_id: u32, done: bool) -> Result<Task, String> {
     let completed = if done { 1 } else { 0 };
     let conn = open_connection();
-    conn.execute(
-        "UPDATE todo SET done = (?1) WHERE id = (?2)",
-        params![completed, task_id],
+    conn.execute_named(
+        "UPDATE todo SET done = :done WHERE id = :id",
+        &[(":done", &completed), (":id", &task_id)]
     )
     .unwrap();
 
-    let mut stmt = conn
-        .prepare("SELECT id, title, done, list, priority FROM todo WHERE id = (?1)")
-        .unwrap();
+    let mut stmt = conn.prepare("SELECT * FROM todo WHERE id = (?1)").unwrap();
     let todo = stmt.query_row(params![task_id], |row| Ok(map_to_task(row)));
 
     match todo {
@@ -86,9 +95,7 @@ pub fn get_all() -> Result<Vec<Task>, &'static str> {
     init_database();
 
     let conn = open_connection();
-    let mut stmt = conn
-        .prepare("SELECT id, title, done, list, priority FROM todo")
-        .unwrap();
+    let mut stmt = conn.prepare("SELECT * FROM todo").unwrap();
     let todo_iter = stmt
         .query_map(NO_PARAMS, |row| Ok(map_to_task(row)))
         .unwrap();
@@ -102,10 +109,11 @@ pub fn get_all() -> Result<Vec<Task>, &'static str> {
 
 fn map_to_task(row: &Row) -> Task {
     Task::create(
-        row.get(0).unwrap(),
-        row.get(1).unwrap(),
-        row.get(2).unwrap(),
-        row.get(3).unwrap(),
-        row.get(4).unwrap(),
+        row.get("id").unwrap(),
+        row.get("title").unwrap(),
+        row.get("done").unwrap(),
+        row.get("list").unwrap(),
+        row.get("priority").unwrap(),
+        row.get("today").unwrap(),
     )
 }

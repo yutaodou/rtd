@@ -1,8 +1,11 @@
+extern crate time;
+
 #[derive(Debug)]
 pub struct Task {
     pub id: u32,
     pub title: String,
     pub done: bool,
+    pub today: String,
     pub list: String,
     pub priority: Priority,
 }
@@ -13,20 +16,31 @@ impl Task {
             id: 0,
             title,
             done: false,
+            today: "".to_string(),
             list,
             priority,
         }
     }
 
-    pub fn create(id: u32, title: String, done: u32, list: String, priority: String) -> Task {
+    pub fn create(
+        id: u32,
+        title: String,
+        done: u32,
+        list: String,
+        priority: String,
+        today: String,
+    ) -> Task {
         Task {
             id,
             title,
             done: done == 1,
+            today,
             list,
             priority: Priority::from(&priority).unwrap(),
         }
     }
+
+    pub fn mark_for_today(self: Self) {}
 }
 
 #[derive(Debug, PartialEq, Copy, Clone)]
@@ -57,10 +71,17 @@ impl Priority {
 
 #[cfg(test)]
 pub mod test {
+    use super::time::OffsetDateTime;
     use crate::task::Priority;
 
     #[test]
     fn test_priority() {
         assert_eq!(Priority::from("l").unwrap(), Priority::Low);
+    }
+
+    #[test]
+    fn test_today() {
+        let now = OffsetDateTime::now().timestamp() / 86400;
+        assert_eq!(now, 123);
     }
 }

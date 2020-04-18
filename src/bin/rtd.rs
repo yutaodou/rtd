@@ -6,9 +6,9 @@ use std::process::exit;
 use clap::{App, Arg, ArgMatches, SubCommand};
 
 use rtd::command::Add;
-use rtd::command::Edit;
 use rtd::command::Command;
 use rtd::command::Done;
+use rtd::command::Edit;
 use rtd::command::List;
 use rtd::command::Today;
 
@@ -55,16 +55,14 @@ fn main() {
             ),
         )
         .subcommand(
-            SubCommand::with_name("edit")
-                .about("Edit a todo")
-                .arg(
-                    Arg::with_name("INPUT")
-                        .help("<todo-title> ~<list> !priority")
-                        .required(true)
-                        .index(1)
-                        .takes_value(true)
-                        .multiple(true),
-                )
+            SubCommand::with_name("edit").about("Edit a todo").arg(
+                Arg::with_name("INPUT")
+                    .help("<todo-title> ~<list> !priority")
+                    .required(true)
+                    .index(1)
+                    .takes_value(true)
+                    .multiple(true),
+            ),
         )
         .subcommand(
             SubCommand::with_name("done")

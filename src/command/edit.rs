@@ -5,6 +5,7 @@ use clap::ArgMatches;
 use crate::command::Command;
 use crate::storage;
 use crate::task::Priority;
+use std::str::FromStr;
 
 #[derive(Debug)]
 pub struct Edit {
@@ -25,10 +26,11 @@ impl Edit {
             if arg.starts_with("~") && arg.len() > 1 {
                 list = Some(arg.get(1..arg.len()).unwrap().to_string());
             } else if arg.starts_with("!") && arg.len() > 1 {
-                priority = Some(arg
-                    .get(1..arg.len())
-                    .map(|p| Priority::from(p).unwrap())
-                    .unwrap());
+                priority = Some(
+                    arg.get(1..arg.len())
+                        .map(|p| Priority::from_str(p).unwrap())
+                        .unwrap(),
+                );
             } else {
                 unknown.push(arg);
             }
@@ -55,16 +57,19 @@ impl Edit {
 
 impl Command for Edit {
     fn run(self) -> Result<(), &'static str> {
-        let result = storage::get(self.task_id).and_then(move |mut task| {
-            self.list.map(|new_list| task.list = new_list);
-            self.priority.map(|new_priority| task.priority = new_priority);
-            self.title.map(|new_title| task.title = new_title);
-            Ok(task)
-        }).and_then(|update_task| storage::update(&update_task));
+        let result = storage::get(self.task_id)
+            .and_then(move |mut task| {
+                self.list.map(|new_list| task.list = new_list);
+                self.priority
+                    .map(|new_priority| task.priority = new_priority);
+                self.title.map(|new_title| task.title = new_title);
+                Ok(task)
+            })
+            .and_then(|update_task| storage::update(&update_task));
 
         match result {
             Ok(_) => Ok(()),
-            Err(_) => Err("Failed to edit task")
+            Err(_) => Err("Failed to edit task"),
         }
     }
 }

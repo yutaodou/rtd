@@ -47,7 +47,7 @@ fn process(input: &str) -> Result<Task, String> {
                 if marked_for_today {
                     task.mark_for_today();
                 } else {
-                    task.unmark_for_today();
+                    task.remove_from_today();
                 }
                 Ok(task)
             })

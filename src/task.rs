@@ -1,5 +1,6 @@
 extern crate time;
 
+use std::str::FromStr;
 use time::OffsetDateTime;
 
 pub const SMART_LISTS: &[&str; 1] = &["today"];
@@ -52,7 +53,7 @@ impl Task {
             done: done == 1,
             today,
             list,
-            priority: Priority::from(&priority).unwrap(),
+            priority: Priority::from_str(&priority).unwrap(),
             created_at: OffsetDateTime::from_unix_timestamp(created_at),
             completed_at: completed_time,
         }
@@ -79,7 +80,7 @@ impl Task {
         self.today = Task::today();
     }
 
-    pub fn unmark_for_today(self: &mut Self) {
+    pub fn remove_from_today(self: &mut Self) {
         self.today = String::new();
     }
 
@@ -99,17 +100,8 @@ pub enum Priority {
     Medium,
 }
 
-impl Priority {
-    pub fn from(priority: &str) -> Result<Priority, &'static str> {
-        match priority.to_lowercase().as_str() {
-            "l" | "low" => Ok(Priority::Low),
-            "h" | "high" => Ok(Priority::High),
-            "m" | "medium" => Ok(Priority::Medium),
-            _ => Err("Unsupported priority"),
-        }
-    }
-
-    pub fn to_string(&self) -> String {
+impl ToString for Priority {
+    fn to_string(&self) -> String {
         match self {
             Priority::Low => String::from("low"),
             Priority::High => String::from("high"),
@@ -118,13 +110,30 @@ impl Priority {
     }
 }
 
+impl FromStr for Priority {
+    type Err = String;
+
+    fn from_str(priority: &str) -> Result<Self, Self::Err> {
+        match priority.to_lowercase().as_str() {
+            "l" | "low" => Ok(Priority::Low),
+            "h" | "high" => Ok(Priority::High),
+            "m" | "medium" => Ok(Priority::Medium),
+            _ => Err(format!("Unsupported priority: {}", priority)),
+        }
+    }
+}
+
 #[cfg(test)]
 pub mod test {
     use crate::task::{Priority, Task};
+    use std::str::FromStr;
 
     #[test]
-    fn test_priority() {
-        assert_eq!(Priority::from("l").unwrap(), Priority::Low);
+    fn test_parse_priority() {
+        assert_eq!(Priority::from_str("l").unwrap(), Priority::Low);
+
+        let result = Priority::from_str("haha").unwrap_err();
+        assert_eq!("Unsupported priority: haha", result);
     }
 
     #[test]
@@ -134,7 +143,7 @@ pub mod test {
         task.mark_for_today();
         assert_eq!(task.is_marked_for_today(), true);
 
-        task.unmark_for_today();
+        task.remove_from_today();
         assert_eq!(task.is_marked_for_today(), false);
     }
 
@@ -146,7 +155,7 @@ pub mod test {
         assert_eq!(task.is_in_list("Today"), true);
         assert_eq!(task.is_in_list("Inbox"), true);
 
-        task.unmark_for_today();
+        task.remove_from_today();
         assert_eq!(task.is_in_list("today"), false);
     }
 

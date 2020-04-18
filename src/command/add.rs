@@ -7,6 +7,7 @@ use crate::command::Command;
 use crate::storage;
 use crate::task::{Priority, Task};
 use crate::view::single;
+use std::str::FromStr;
 
 #[derive(Debug)]
 pub struct Add {
@@ -26,7 +27,7 @@ impl Add {
             } else if arg.starts_with("!") && arg.len() > 1 {
                 priority = arg
                     .get(1..arg.len())
-                    .map(|p| Priority::from(p).unwrap())
+                    .map(|p| Priority::from_str(p).unwrap())
                     .unwrap();
             } else {
                 title = arg.to_string();

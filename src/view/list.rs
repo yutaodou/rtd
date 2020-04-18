@@ -1,29 +1,34 @@
-use std::io::Write;
+use std::io::{Error, Write};
 
 use ansi_term::Style;
 
 use crate::task::Task;
 
 pub struct Render<'a> {
-    pub tasks: Vec<&'a Task>,
+    pub tasks: &'a Vec<&'a Task>,
+    pub list: &'a str,
+    pub is_smart_list: bool,
 }
 
 impl<'a> Render<'a> {
     pub fn render<W: Write>(self: &Self, w: &mut W) -> Result<(), &'static str> {
-        let mut lists: Vec<&str> = self.tasks.iter().map(|task| task.list.as_str()).collect();
-        lists.dedup();
-        for list in lists.iter() {
-            writeln!(w, "{}", list).unwrap();
-
-            let list_content = self.tasks.iter().filter(|task| task.list == *list);
-            for task in list_content {
-                self.render_single(w, task);
+        if self.tasks.is_empty() {
+            match writeln!(w, "No tasks found for {}", self.list) {
+                Err(_) => Err("Failed to show list tasks"),
+                Ok(_) => Ok(()),
+            }
+        } else {
+            writeln!(w, "{}", self.list).unwrap();
+            let mut results = self.tasks.iter().map(|task| self.render_single(w, task));
+            if results.any(|result| result.is_err()) {
+                Err("Failed to show list tasks")
+            } else {
+                Ok(())
             }
         }
-        Ok(())
     }
 
-    fn render_single<W: Write>(self: &Self, w: &mut W, task: &Task) {
+    fn render_single<W: Write>(self: &Self, w: &mut W, task: &Task) -> Result<(), Error> {
         let title = if task.done {
             Style::new().strikethrough().paint(&task.title)
         } else {
@@ -32,11 +37,15 @@ impl<'a> Render<'a> {
 
         writeln!(
             w,
-            "{:>4}. {} !{}",
+            "{:>4}. {} !{} {}",
             task.id,
             title,
-            Style::default().paint(task.priority.to_string())
+            Style::default().paint(task.priority.to_string()),
+            Style::default().paint(if self.is_smart_list {
+                format!("~{}", task.list)
+            } else {
+                String::from("")
+            }),
         )
-        .unwrap();
     }
 }

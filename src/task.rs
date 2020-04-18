@@ -2,6 +2,8 @@ extern crate time;
 
 use time::OffsetDateTime;
 
+pub const SMART_LISTS: &[&str; 1] = &["today"];
+
 #[derive(Debug)]
 pub struct Task {
     pub id: u32,
@@ -39,6 +41,13 @@ impl Task {
             today,
             list,
             priority: Priority::from(&priority).unwrap(),
+        }
+    }
+
+    pub fn is_in_list(&self, list: &str) -> bool {
+        match list.to_lowercase().as_str() {
+            "today" => self.is_marked_for_today(),
+            _ => self.list.to_lowercase().eq(list.to_lowercase().as_str()),
         }
     }
 
@@ -109,5 +118,24 @@ pub mod test {
 
         task.unmark_for_today();
         assert_eq!(task.is_marked_for_today(), false);
+    }
+
+    #[test]
+    fn test_in_list() {
+        let mut task = Task::create(
+            1,
+            "test-todo".to_string(),
+            1,
+            "inbox".to_string(),
+            "high".to_string(),
+            "".to_string(),
+        );
+
+        task.mark_for_today();
+        assert_eq!(task.is_in_list("Today"), true);
+        assert_eq!(task.is_in_list("Inbox"), true);
+
+        task.unmark_for_today();
+        assert_eq!(task.is_in_list("today"), false);
     }
 }

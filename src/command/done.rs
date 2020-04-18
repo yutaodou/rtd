@@ -32,8 +32,8 @@ impl<'a> Command for Done<'a> {
             }
         });
 
-        if false {
-            Err("")
+        if has_errors {
+            Err("Error occurred")
         } else {
             Ok(())
         }

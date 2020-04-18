@@ -9,6 +9,7 @@ use rtd::command::Add;
 use rtd::command::Command;
 use rtd::command::Done;
 use rtd::command::List;
+use rtd::command::Today;
 
 fn main() {
     let opts = App::new("Rust To Do")
@@ -62,6 +63,16 @@ fn main() {
                         .multiple(true),
                 ),
         )
+        .subcommand(
+            SubCommand::with_name("today")
+                .about("Mark/un-mark task as today's priority")
+                .arg(
+                    Arg::with_name("INPUT")
+                        .required(true)
+                        .takes_value(true)
+                        .multiple(true),
+                ),
+        )
         .get_matches();
 
     match run(&opts) {
@@ -79,6 +90,7 @@ fn run(opts: &ArgMatches) -> Result<(), &'static str> {
         ("add", Some(add_opts)) => Add::new(add_opts).run(),
         ("list", Some(list_opts)) => List::new(list_opts).run(),
         ("done", Some(done_opts)) => Done::new(done_opts).run(),
+        ("today", Some(today_opts)) => Today::new(today_opts).run(),
         _ => Err("Unsupported command."),
     }
 }

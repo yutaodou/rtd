@@ -46,6 +46,9 @@ impl Task {
         self.today = Task::today();
     }
 
+    pub fn unmark_for_today(self: &mut Self) {
+        self.today = String::new();
+    }
     pub fn is_marked_for_today(&self) -> bool {
         self.today.eq(Task::today().as_str())
     }
@@ -83,7 +86,6 @@ impl Priority {
 
 #[cfg(test)]
 pub mod test {
-    use super::time::OffsetDateTime;
     use crate::task::{Priority, Task};
 
     #[test]
@@ -103,7 +105,9 @@ pub mod test {
         );
 
         task.mark_for_today();
-
         assert_eq!(task.is_marked_for_today(), true);
+
+        task.unmark_for_today();
+        assert_eq!(task.is_marked_for_today(), false);
     }
 }

@@ -33,7 +33,6 @@ impl Add {
             }
         });
 
-        println!("{:?}", priority);
         Add {
             title,
             list,

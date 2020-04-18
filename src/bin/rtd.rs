@@ -55,7 +55,7 @@ fn main() {
         )
         .subcommand(
             SubCommand::with_name("done")
-                .about("Mark task as done")
+                .about("Mark task as completed/un-completed")
                 .arg(
                     Arg::with_name("INPUT")
                         .required(true)
@@ -68,6 +68,7 @@ fn main() {
                 .about("Mark/un-mark task as today's priority")
                 .arg(
                     Arg::with_name("INPUT")
+                        .help("<mark-task-id> / ~<un-mark-task-id>")
                         .required(true)
                         .takes_value(true)
                         .multiple(true),

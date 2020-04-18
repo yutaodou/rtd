@@ -1,20 +1,21 @@
 # rtd
 
-A command line task management tool to practice rust
+Manage your todo in command line with `rtd` (Rust To Do)
 
 ## Features
-**Add task**
+**Add a todo**
 
 ```
-rtd add "This is a todo" ~inbox #tag1 !low @20200202
+// Add a new to-do to inbox as low priority
+rtd add "This is a todo" ~inbox !low 
 ```
 
-**List tasks**
+**List todo**
 ```
-# list all tasks not done yet
+# list all todo not done yet
 rtd list 
 
-# list completed tasks
+# list completed todo
 rtd list --done
 
 # list all
@@ -22,8 +23,21 @@ rtd list --done
 rtd list --all
 ```
 
+**Today's priority**
+```
+// Mark a todo as your today's priority
+rtd today <todo-id>
+
+// Unmark a todo from your today's priority by prefix it with a ~
+rtd today ~<todo-id>
+```
+
 **Complete task**
 
 ```
+// mark task as done
 rtd done <task-id>
+
+// mark task as not done by prefix task id with a ~
+rtd done ~<task-id>
 ```

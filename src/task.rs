@@ -1,5 +1,7 @@
 extern crate time;
 
+use time::OffsetDateTime;
+
 #[derive(Debug)]
 pub struct Task {
     pub id: u32,
@@ -40,7 +42,17 @@ impl Task {
         }
     }
 
-    pub fn mark_for_today(self: Self) {}
+    pub fn mark_for_today(self: &mut Self) {
+        self.today = Task::today();
+    }
+
+    pub fn is_marked_for_today(&self) -> bool {
+        self.today.eq(Task::today().as_str())
+    }
+
+    fn today() -> String {
+        OffsetDateTime::now().format("%F")
+    }
 }
 
 #[derive(Debug, PartialEq, Copy, Clone)]
@@ -72,7 +84,7 @@ impl Priority {
 #[cfg(test)]
 pub mod test {
     use super::time::OffsetDateTime;
-    use crate::task::Priority;
+    use crate::task::{Priority, Task};
 
     #[test]
     fn test_priority() {
@@ -80,8 +92,18 @@ pub mod test {
     }
 
     #[test]
-    fn test_today() {
-        let now = OffsetDateTime::now().timestamp() / 86400;
-        assert_eq!(now, 123);
+    fn test_mark_for_today() {
+        let mut task = Task::create(
+            1,
+            "test-todo".to_string(),
+            1,
+            "inbox".to_string(),
+            "high".to_string(),
+            "".to_string(),
+        );
+
+        task.mark_for_today();
+
+        assert_eq!(task.is_marked_for_today(), true);
     }
 }

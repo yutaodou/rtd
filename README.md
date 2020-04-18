@@ -10,7 +10,7 @@ Manage your todo in command line with `rtd` (Rust To Do)
 rtd add "This is a todo" ~inbox !low 
 ```
 
-**List todo**
+**List todos**
 ```
 # list all todo not done yet
 rtd list 
@@ -19,8 +19,10 @@ rtd list
 rtd list --done
 
 # list all
-
 rtd list --all
+
+# list all todo from a specific list
+rtd list inbox -a
 ```
 
 **Today's priority**

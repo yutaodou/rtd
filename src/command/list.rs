@@ -47,6 +47,7 @@ fn render_lists(tasks: &Vec<&Task>) -> Result<(), &'static str> {
     render_list(tasks, "today", true).unwrap();
 
     let mut lists: Vec<&str> = tasks.iter().map(|task| task.list.as_str()).collect();
+    lists.sort();
     lists.dedup();
 
     let mut result = lists.iter().map(|list| render_list(tasks, list, false));

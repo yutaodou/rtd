@@ -19,7 +19,7 @@ impl<'a> Done<'a> {
 }
 
 impl<'a> Command for Done<'a> {
-    fn run(self: &Self) -> Result<(), &'static str> {
+    fn run(self: Self) -> Result<(), &'static str> {
         let results = self.args.values_of("INPUT").unwrap().map(process);
 
         let mut has_errors = false;

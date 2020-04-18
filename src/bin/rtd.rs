@@ -6,6 +6,7 @@ use std::process::exit;
 use clap::{App, Arg, ArgMatches, SubCommand};
 
 use rtd::command::Add;
+use rtd::command::Edit;
 use rtd::command::Command;
 use rtd::command::Done;
 use rtd::command::List;
@@ -17,12 +18,12 @@ fn main() {
         .about("Manage to-dos in command line")
         .subcommand(
             SubCommand::with_name("list")
-                .about("Lists tasks")
+                .about("Lists todos")
                 .arg(
                     Arg::with_name("name")
                         .required(false)
                         .index(1)
-                        .help("Show tasks from specified list")
+                        .help("Show todo from specified list")
                         .takes_value(true)
                         .multiple(false),
                 )
@@ -30,7 +31,7 @@ fn main() {
                     Arg::with_name("all")
                         .short("a")
                         .long("all")
-                        .help("Show tasks in all lists including completed tasks")
+                        .help("Show todos in all lists including completed")
                         .conflicts_with("done")
                         .takes_value(false),
                 )
@@ -52,6 +53,18 @@ fn main() {
                     .takes_value(true)
                     .multiple(true),
             ),
+        )
+        .subcommand(
+            SubCommand::with_name("edit")
+                .about("Edit a todo")
+                .arg(
+                    Arg::with_name("INPUT")
+                        .help("<todo-title> ~<list> !priority")
+                        .required(true)
+                        .index(1)
+                        .takes_value(true)
+                        .multiple(true),
+                )
         )
         .subcommand(
             SubCommand::with_name("done")
@@ -89,6 +102,7 @@ fn main() {
 fn run(opts: &ArgMatches) -> Result<(), &'static str> {
     match opts.subcommand() {
         ("add", Some(add_opts)) => Add::new(add_opts).run(),
+        ("edit", Some(edit_opts)) => Edit::new(edit_opts).run(),
         ("list", Some(list_opts)) => List::new(list_opts).run(),
         ("done", Some(done_opts)) => Done::new(done_opts).run(),
         ("today", Some(today_opts)) => Today::new(today_opts).run(),

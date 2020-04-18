@@ -42,7 +42,7 @@ impl Add {
 }
 
 impl Command for Add {
-    fn run(self: &Self) -> Result<(), &'static str> {
+    fn run(self: Self) -> Result<(), &'static str> {
         let new_task = Task::new(self.title.clone(), self.list.clone(), self.priority);
         let result = storage::add(&new_task)?;
         single::render(&result, &mut stdout())?;

@@ -32,7 +32,13 @@ rtd today <todo-id>
 rtd today ~<todo-id>
 ```
 
-**Complete task**
+**Edit todo**
+
+```
+rtd <task-id> "new-title" ~<new-list> !<priority>
+```
+
+**Mark todo as completed**
 
 ```
 // mark task as done

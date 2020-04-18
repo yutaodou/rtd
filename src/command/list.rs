@@ -20,7 +20,7 @@ impl<'a> List<'a> {
 }
 
 impl<'a> Command for List<'a> {
-    fn run(self: &Self) -> Result<(), &'static str> {
+    fn run(self: Self) -> Result<(), &'static str> {
         let tasks = storage::get_all().unwrap();
         let result: Vec<&Task>;
 

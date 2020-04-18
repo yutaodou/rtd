@@ -12,6 +12,7 @@ pub struct Task {
     pub today: String,
     pub list: String,
     pub priority: Priority,
+    pub created_at: OffsetDateTime,
 }
 
 impl Task {
@@ -23,16 +24,18 @@ impl Task {
             today: "".to_string(),
             list,
             priority,
+            created_at: OffsetDateTime::now()
         }
     }
 
     pub fn create(
         id: u32,
         title: String,
-        done: u32,
+        done: u8,
         list: String,
         priority: String,
         today: String,
+        created_at: i64
     ) -> Task {
         Task {
             id,
@@ -41,6 +44,7 @@ impl Task {
             today,
             list,
             priority: Priority::from(&priority).unwrap(),
+            created_at: OffsetDateTime::from_unix_timestamp(created_at),
         }
     }
 
@@ -96,6 +100,7 @@ impl Priority {
 #[cfg(test)]
 pub mod test {
     use crate::task::{Priority, Task};
+    use super::time::OffsetDateTime;
 
     #[test]
     fn test_priority() {
@@ -111,6 +116,7 @@ pub mod test {
             "inbox".to_string(),
             "high".to_string(),
             "".to_string(),
+            OffsetDateTime::now().timestamp(),
         );
 
         task.mark_for_today();
@@ -129,6 +135,7 @@ pub mod test {
             "inbox".to_string(),
             "high".to_string(),
             "".to_string(),
+            OffsetDateTime::now().timestamp(),
         );
 
         task.mark_for_today();

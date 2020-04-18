@@ -25,7 +25,8 @@ fn init_database() {
             done            INTEGER DEFAULT 0,
             today           TEXT DEFAULT '',
             list            TEXT DEFAULT '',
-            priority        TEXT DEFAULT 'medium'
+            priority        TEXT DEFAULT 'medium',
+            created_at      INTEGER
             )",
         params![],
     )
@@ -61,11 +62,12 @@ pub fn add(task: &Task) -> Result<Task, &'static str> {
     init_database();
     let conn = open_connection();
     conn.execute_named(
-        "INSERT INTO todo (title, list, priority) VALUES (:title, :list, :priority)",
+        "INSERT INTO todo (title, list, priority, created_at) VALUES (:title, :list, :priority, :created_at)",
         &[
             (":title", &task.title),
             (":list", &task.list.as_str()),
             (":priority", &task.priority.to_string()),
+            (":created_at", &task.created_at.timestamp()),
         ],
     )
     .unwrap();
@@ -118,5 +120,6 @@ fn map_to_task(row: &Row) -> Task {
         row.get("list").unwrap(),
         row.get("priority").unwrap(),
         row.get("today").unwrap(),
+        row.get("created_at").unwrap(),
     )
 }

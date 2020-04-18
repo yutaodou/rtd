@@ -24,11 +24,12 @@ impl<'a> Command for Today<'a> {
 
         let mut has_errors = false;
         results.for_each(|result| {
-            if result.is_ok() {
-                single::render(&result.unwrap(), &mut stdout()).unwrap();
-            } else {
-                has_errors = true;
-                println!("{}", result.unwrap_err());
+            match result {
+                Ok(task) => single::render(&task, &mut stdout()).unwrap(),
+                Err(err) => {
+                    has_errors = true;
+                    println!("{}", err);
+                }
             }
         });
 
@@ -61,7 +62,7 @@ fn process(input: &str) -> Result<Task, String> {
 fn parse(value: &str) -> Result<(u32, bool), String> {
     let mut task_id = value;
     let mut marked_for_today = true;
-    if value.starts_with("~") {
+    if value.starts_with('~') {
         task_id = &value[1..];
         marked_for_today = false;
     };

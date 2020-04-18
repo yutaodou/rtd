@@ -21,29 +21,30 @@ impl Edit {
         let mut title = None;
         let mut list = None;
         let mut priority = None;
-        let mut unknown = vec![];
+        let mut free_args = vec![];
+
         args.values_of("INPUT").unwrap().for_each(|arg| {
-            if arg.starts_with("~") && arg.len() > 1 {
+            if arg.starts_with('~') && arg.len() > 1 {
                 list = Some(arg.get(1..arg.len()).unwrap().to_string());
-            } else if arg.starts_with("!") && arg.len() > 1 {
+            } else if arg.starts_with('!') && arg.len() > 1 {
                 priority = Some(
                     arg.get(1..arg.len())
                         .map(|p| Priority::from_str(p).unwrap())
                         .unwrap(),
                 );
             } else {
-                unknown.push(arg);
+                free_args.push(arg);
             }
         });
 
-        if unknown.len() < 1 {
+        if free_args.is_empty() {
             panic!("Todo id not provided.");
         }
 
-        task_id = unknown.get(0).unwrap().parse().unwrap();
+        task_id = free_args.get(0).unwrap().parse().unwrap();
 
-        if unknown.len() == 2 {
-            title = Some(unknown.get(1).unwrap().to_string());
+        if free_args.len() == 2 {
+            title = Some((*free_args.get(1).unwrap()).to_string());
         }
 
         Edit {
@@ -59,10 +60,17 @@ impl Command for Edit {
     fn run(self) -> Result<(), &'static str> {
         let result = storage::get(self.task_id)
             .and_then(move |mut task| {
-                self.list.map(|new_list| task.list = new_list);
-                self.priority
-                    .map(|new_priority| task.priority = new_priority);
-                self.title.map(|new_title| task.title = new_title);
+                if let Some(new_list) = self.list {
+                    task.list = new_list;
+                }
+
+                if let Some(new_priority) = self.priority {
+                    task.priority = new_priority;
+                }
+
+                if let Some(new_title) = self.title {
+                    task.title = new_title;
+                }
                 Ok(task)
             })
             .and_then(|update_task| storage::update(&update_task));

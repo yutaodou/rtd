@@ -27,7 +27,7 @@ impl<'a> Command for List<'a> {
         if self.opts.is_present("done") {
             result = tasks.iter().filter(|task| task.done).collect();
         } else if !self.opts.is_present("all") {
-            result = tasks.iter().filter(|task| task.done == false).collect();
+            result = tasks.iter().filter(|task| !task.done).collect();
         } else {
             result = tasks.iter().collect();
         }
@@ -43,7 +43,7 @@ impl<'a> Command for List<'a> {
     }
 }
 
-fn render_lists(tasks: &Vec<&Task>) -> Result<(), &'static str> {
+fn render_lists(tasks: &[&Task]) -> Result<(), &'static str> {
     render_list(tasks, "today", true).unwrap();
 
     let mut lists: Vec<&str> = tasks.iter().map(|task| task.list.as_str()).collect();
@@ -59,7 +59,7 @@ fn render_lists(tasks: &Vec<&Task>) -> Result<(), &'static str> {
     }
 }
 
-fn render_list(result: &Vec<&Task>, list: &str, is_smart_list: bool) -> Result<(), &'static str> {
+fn render_list(result: &[&Task], list: &str, is_smart_list: bool) -> Result<(), &'static str> {
     let tasks = result
         .iter()
         .filter(|task| task.is_in_list(list))

@@ -22,9 +22,9 @@ impl Add {
         let mut list = String::from("inbox");
         let mut priority = Priority::Medium;
         args.values_of("INPUT").unwrap().for_each(|arg| {
-            if arg.starts_with("~") && arg.len() > 1 {
+            if arg.starts_with('~') && arg.len() > 1 {
                 list = arg.get(1..arg.len()).unwrap().to_string();
-            } else if arg.starts_with("!") && arg.len() > 1 {
+            } else if arg.starts_with('!') && arg.len() > 1 {
                 priority = arg
                     .get(1..arg.len())
                     .map(|p| Priority::from_str(p).unwrap())

@@ -44,7 +44,11 @@ fn process(input: &str) -> Result<Task, String> {
     parse(input)
         .and_then(|(task_id, done)| {
             storage::get(task_id).and_then(|mut task| {
-                task.done = done;
+                if done {
+                    task.mark_completed();
+                } else {
+                    task.mark_uncompleted();
+                }
                 Ok(task)
             })
         })

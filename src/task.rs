@@ -13,6 +13,7 @@ pub struct Task {
     pub list: String,
     pub priority: Priority,
     pub created_at: OffsetDateTime,
+    pub completed_at: Option<OffsetDateTime>,
 }
 
 impl Task {
@@ -24,7 +25,8 @@ impl Task {
             today: "".to_string(),
             list,
             priority,
-            created_at: OffsetDateTime::now()
+            created_at: OffsetDateTime::now(),
+            completed_at: None,
         }
     }
 
@@ -35,8 +37,15 @@ impl Task {
         list: String,
         priority: String,
         today: String,
-        created_at: i64
+        created_at: i64,
+        completed_at: i64,
     ) -> Task {
+        let completed_time = if completed_at == 0 {
+            None
+        } else {
+            Some(OffsetDateTime::from_unix_timestamp(completed_at))
+        };
+
         Task {
             id,
             title,
@@ -45,7 +54,18 @@ impl Task {
             list,
             priority: Priority::from(&priority).unwrap(),
             created_at: OffsetDateTime::from_unix_timestamp(created_at),
+            completed_at: completed_time,
         }
+    }
+
+    pub fn mark_completed(self: &mut Self) {
+        self.done = true;
+        self.completed_at = Some(OffsetDateTime::now());
+    }
+
+    pub fn mark_uncompleted(self: &mut Self) {
+        self.done = false;
+        self.completed_at = None;
     }
 
     pub fn is_in_list(&self, list: &str) -> bool {
@@ -62,6 +82,7 @@ impl Task {
     pub fn unmark_for_today(self: &mut Self) {
         self.today = String::new();
     }
+
     pub fn is_marked_for_today(&self) -> bool {
         self.today.eq(Task::today().as_str())
     }
@@ -100,7 +121,6 @@ impl Priority {
 #[cfg(test)]
 pub mod test {
     use crate::task::{Priority, Task};
-    use super::time::OffsetDateTime;
 
     #[test]
     fn test_priority() {
@@ -109,15 +129,7 @@ pub mod test {
 
     #[test]
     fn test_mark_for_today() {
-        let mut task = Task::create(
-            1,
-            "test-todo".to_string(),
-            1,
-            "inbox".to_string(),
-            "high".to_string(),
-            "".to_string(),
-            OffsetDateTime::now().timestamp(),
-        );
+        let mut task = Task::new("test-todo".to_string(), "inbox".to_string(), Priority::High);
 
         task.mark_for_today();
         assert_eq!(task.is_marked_for_today(), true);
@@ -128,15 +140,7 @@ pub mod test {
 
     #[test]
     fn test_in_list() {
-        let mut task = Task::create(
-            1,
-            "test-todo".to_string(),
-            1,
-            "inbox".to_string(),
-            "high".to_string(),
-            "".to_string(),
-            OffsetDateTime::now().timestamp(),
-        );
+        let mut task = Task::new("test-todo".to_string(), "inbox".to_string(), Priority::High);
 
         task.mark_for_today();
         assert_eq!(task.is_in_list("Today"), true);
@@ -144,5 +148,20 @@ pub mod test {
 
         task.unmark_for_today();
         assert_eq!(task.is_in_list("today"), false);
+    }
+
+    #[test]
+    fn test_mark_completed() {
+        let mut task = Task::new("test-todo".to_string(), "inbox".to_string(), Priority::High);
+
+        assert!(task.completed_at.is_none());
+
+        task.mark_completed();
+        assert!(task.done);
+        assert!(task.completed_at.is_some());
+
+        task.mark_uncompleted();
+        assert_eq!(task.done, false);
+        assert_eq!(task.completed_at.is_some(), false);
     }
 }

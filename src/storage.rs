@@ -26,7 +26,8 @@ fn init_database() {
             today           TEXT DEFAULT '',
             list            TEXT DEFAULT '',
             priority        TEXT DEFAULT 'medium',
-            created_at      INTEGER
+            created_at      INTEGER DEFAULT 0,
+            completed_at    INTEGER DEFAULT 0
             )",
         params![],
     )
@@ -44,9 +45,14 @@ fn open_connection() -> Connection {
 
 pub fn update(task: &Task) -> Result<(), String> {
     init_database();
+    let completed_at = match task.completed_at {
+        Some(date) => date.timestamp(),
+        None => 0,
+    };
+
     let conn = open_connection();
     conn.execute_named(
-        "UPDATE todo SET title = :title, list = :list, done = :done, today = :today, priority = :priority WHERE id = :id",
+        "UPDATE todo SET title = :title, list = :list, done = :done, today = :today, priority = :priority, completed_at = :completed_at WHERE id = :id",
        &[
            (":title", &task.title),
            (":list", &task.list.as_str()),
@@ -54,6 +60,7 @@ pub fn update(task: &Task) -> Result<(), String> {
            (":done", if task.done {&1} else {&0}),
            (":today", &task.today),
            (":id", &task.id),
+           (":completed_at", &completed_at),
        ]).unwrap();
     Ok(())
 }
@@ -121,5 +128,6 @@ fn map_to_task(row: &Row) -> Task {
         row.get("priority").unwrap(),
         row.get("today").unwrap(),
         row.get("created_at").unwrap(),
+        row.get("completed_at").unwrap(),
     )
 }

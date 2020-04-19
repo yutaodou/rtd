@@ -7,7 +7,7 @@ Manage your todo in command line with `rtd` (Rust To Do)
 
 ```
 // Add a new to-do to inbox as low priority
-rtd add "This is a todo" ~inbox !low 
+rtd add "This is a todo" :inbox +low 
 ```
 
 **List todos**
@@ -37,7 +37,7 @@ rtd today ~<todo-id>
 **Edit todo**
 
 ```
-rtd <task-id> "new-title" ~<new-list> !<priority>
+rtd <task-id> "new-title" ~<new-list> +<priority>
 ```
 
 **Mark todo as completed**

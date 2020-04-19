@@ -19,22 +19,20 @@ impl<'a> Today<'a> {
 }
 
 impl<'a> Command for Today<'a> {
-    fn run(self: Self) -> Result<(), &'static str> {
+    fn run(self: Self) -> Result<(), String> {
         let results = self.args.values_of("INPUT").unwrap().map(process);
 
         let mut has_errors = false;
-        results.for_each(|result| {
-            match result {
-                Ok(task) => single::render(&task, &mut stdout()).unwrap(),
-                Err(err) => {
-                    has_errors = true;
-                    println!("{}", err);
-                }
+        results.for_each(|result| match result {
+            Ok(task) => single::render(&task, &mut stdout()).unwrap(),
+            Err(err) => {
+                has_errors = true;
+                println!("{}", err);
             }
         });
 
         if false {
-            Err("")
+            Err(String::from("Failed to add task to today"))
         } else {
             Ok(())
         }

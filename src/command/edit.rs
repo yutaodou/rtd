@@ -5,6 +5,8 @@ use clap::ArgMatches;
 use crate::command::Command;
 use crate::storage;
 use crate::task::Priority;
+use crate::view::single;
+use std::io::stdout;
 use std::str::FromStr;
 
 #[derive(Debug)]
@@ -24,9 +26,9 @@ impl Edit {
         let mut free_args = vec![];
 
         args.values_of("INPUT").unwrap().for_each(|arg| {
-            if arg.starts_with('~') && arg.len() > 1 {
+            if arg.starts_with(':') && arg.len() > 1 {
                 list = Some(arg.get(1..arg.len()).unwrap().to_string());
-            } else if arg.starts_with('!') && arg.len() > 1 {
+            } else if arg.starts_with('+') && arg.len() > 1 {
                 priority = Some(
                     arg.get(1..arg.len())
                         .map(|p| Priority::from_str(p).unwrap())
@@ -57,7 +59,7 @@ impl Edit {
 }
 
 impl Command for Edit {
-    fn run(self) -> Result<(), &'static str> {
+    fn run(self) -> Result<(), String> {
         let result = storage::get(self.task_id)
             .and_then(move |mut task| {
                 if let Some(new_list) = self.list {
@@ -73,11 +75,13 @@ impl Command for Edit {
                 }
                 Ok(task)
             })
-            .and_then(|update_task| storage::update(&update_task));
+            .and_then(|update_task| {
+                storage::update(&update_task).and_then(|task| single::render(task, &mut stdout()))
+            });
 
         match result {
             Ok(_) => Ok(()),
-            Err(_) => Err("Failed to edit task"),
+            Err(_) => Err(String::from("Failed to edit task")),
         }
     }
 }

@@ -1,5 +1,5 @@
 use std::result::Result;
 
 pub trait Command {
-    fn run(self: Self) -> Result<(), &'static str>;
+    fn run(self: Self) -> Result<(), String>;
 }

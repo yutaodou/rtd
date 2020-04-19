@@ -20,7 +20,7 @@ impl<'a> List<'a> {
 }
 
 impl<'a> Command for List<'a> {
-    fn run(self: Self) -> Result<(), &'static str> {
+    fn run(self: Self) -> Result<(), String> {
         let tasks = storage::get_all().unwrap();
         let result: Vec<&Task>;
 
@@ -43,9 +43,8 @@ impl<'a> Command for List<'a> {
     }
 }
 
-fn render_lists(tasks: &[&Task]) -> Result<(), &'static str> {
+fn render_lists(tasks: &[&Task]) -> Result<(), String> {
     render_list(tasks, "today", true).unwrap();
-
     let mut lists: Vec<&str> = tasks.iter().map(|task| task.list.as_str()).collect();
     lists.sort();
     lists.dedup();
@@ -53,13 +52,13 @@ fn render_lists(tasks: &[&Task]) -> Result<(), &'static str> {
     let mut result = lists.iter().map(|list| render_list(tasks, list, false));
 
     if result.any(|result| result.is_err()) {
-        Err("Failed to show tasks")
+        Err(String::from("Failed to show tasks"))
     } else {
         Ok(())
     }
 }
 
-fn render_list(result: &[&Task], list: &str, is_smart_list: bool) -> Result<(), &'static str> {
+fn render_list(result: &[&Task], list: &str, is_smart_list: bool) -> Result<(), String> {
     let tasks = result
         .iter()
         .filter(|task| task.is_in_list(list))

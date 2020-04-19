@@ -47,7 +47,7 @@ fn main() {
         .subcommand(
             SubCommand::with_name("add").about("Add a new task").arg(
                 Arg::with_name("INPUT")
-                    .help("<todo-title> ~<list> !priority")
+                    .help("<todo-title> :<list> +priority")
                     .required(true)
                     .index(1)
                     .takes_value(true)
@@ -57,7 +57,7 @@ fn main() {
         .subcommand(
             SubCommand::with_name("edit").about("Edit a todo").arg(
                 Arg::with_name("INPUT")
-                    .help("<todo-title> ~<list> !priority")
+                    .help("<todo-title> :<list> +priority")
                     .required(true)
                     .index(1)
                     .takes_value(true)
@@ -80,6 +80,7 @@ fn main() {
                 .arg(
                     Arg::with_name("INPUT")
                         .help("<mark-task-id> / ~<un-mark-task-id>")
+                        .allow_hyphen_values(true)
                         .required(true)
                         .takes_value(true)
                         .multiple(true),
@@ -91,19 +92,18 @@ fn main() {
         Ok(_) => exit(0),
         Err(error) => {
             eprintln!("{}", error);
-            eprintln!("{}", opts.usage());
             exit(1);
         }
     }
 }
 
-fn run(opts: &ArgMatches) -> Result<(), &'static str> {
+fn run(opts: &ArgMatches) -> Result<(), String> {
     match opts.subcommand() {
         ("add", Some(add_opts)) => Add::new(add_opts).run(),
         ("edit", Some(edit_opts)) => Edit::new(edit_opts).run(),
         ("list", Some(list_opts)) => List::new(list_opts).run(),
         ("done", Some(done_opts)) => Done::new(done_opts).run(),
         ("today", Some(today_opts)) => Today::new(today_opts).run(),
-        _ => Err("Unsupported command."),
+        (cmd, _) => Err(format!("Unsupported command: {}", cmd)),
     }
 }

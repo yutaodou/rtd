@@ -11,17 +11,17 @@ pub struct Render<'a> {
 }
 
 impl<'a> Render<'a> {
-    pub fn render<W: Write>(self: &Self, w: &mut W) -> Result<(), &'static str> {
+    pub fn render<W: Write>(self: &Self, w: &mut W) -> Result<(), String> {
         if self.tasks.is_empty() {
             match writeln!(w, "No tasks found for {}", self.list) {
-                Err(_) => Err("Failed to show list tasks"),
+                Err(_) => Err(String::from("Failed to show list tasks")),
                 Ok(_) => Ok(()),
             }
         } else {
             writeln!(w, "{}", self.list).unwrap();
             let mut results = self.tasks.iter().map(|task| self.render_single(w, task));
             if results.any(|result| result.is_err()) {
-                Err("Failed to show list tasks")
+                Err(String::from("Failed to show list tasks"))
             } else {
                 Ok(())
             }
@@ -37,12 +37,12 @@ impl<'a> Render<'a> {
 
         writeln!(
             w,
-            "{:>4}. {} !{} {}",
+            "{:>4}. {} +{} {}",
             task.id,
             title,
             Style::default().paint(task.priority.to_string()),
             Style::default().paint(if self.is_smart_list {
-                format!("~{}", task.list)
+                format!(":{}", task.list)
             } else {
                 String::from("")
             }),

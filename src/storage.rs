@@ -43,7 +43,7 @@ fn open_connection() -> Connection {
     Connection::open(&database_file_path).unwrap()
 }
 
-pub fn update(task: &Task) -> Result<(), String> {
+pub fn update(task: &Task) -> Result<&Task, String> {
     init_database();
     let completed_at = match task.completed_at {
         Some(date) => date.timestamp(),
@@ -53,19 +53,19 @@ pub fn update(task: &Task) -> Result<(), String> {
     let conn = open_connection();
     conn.execute_named(
         "UPDATE todo SET title = :title, list = :list, done = :done, today = :today, priority = :priority, completed_at = :completed_at WHERE id = :id",
-       &[
-           (":title", &task.title),
-           (":list", &task.list.as_str()),
-           (":priority", &task.priority.to_string()),
-           (":done", if task.done {&1} else {&0}),
-           (":today", &task.today),
-           (":id", &task.id),
-           (":completed_at", &completed_at),
-       ]).unwrap();
-    Ok(())
+        &[
+            (":title", &task.title),
+            (":list", &task.list.as_str()),
+            (":priority", &task.priority.to_string()),
+            (":done", if task.done { &1 } else { &0 }),
+            (":today", &task.today),
+            (":id", &task.id),
+            (":completed_at", &completed_at),
+        ]).unwrap();
+    Ok(task)
 }
 
-pub fn add(task: &Task) -> Result<Task, &'static str> {
+pub fn add(task: &Task) -> Result<Task, String> {
     init_database();
     let conn = open_connection();
     conn.execute_named(
@@ -77,7 +77,7 @@ pub fn add(task: &Task) -> Result<Task, &'static str> {
             (":created_at", &task.created_at.timestamp()),
         ],
     )
-    .unwrap();
+        .unwrap();
 
     let result = conn
         .prepare("SELECT * FROM todo ORDER BY id DESC LIMIT 1")
@@ -87,7 +87,7 @@ pub fn add(task: &Task) -> Result<Task, &'static str> {
         Ok(task) => Ok(task),
         Err(err) => {
             eprintln!("{}", err.to_string());
-            Err("Failed to add task")
+            Err(String::from("Failed to add task"))
         }
     }
 }
@@ -103,7 +103,7 @@ pub fn get(task_id: u32) -> Result<Task, String> {
     }
 }
 
-pub fn get_all() -> Result<Vec<Task>, &'static str> {
+pub fn get_all() -> Result<Vec<Task>, String> {
     init_database();
 
     let conn = open_connection();

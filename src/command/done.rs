@@ -19,24 +19,20 @@ impl<'a> Done<'a> {
 }
 
 impl<'a> Command for Done<'a> {
-    fn run(self: Self) -> Result<(), &'static str> {
+    fn run(self: Self) -> Result<(), String> {
         let results = self.args.values_of("INPUT").unwrap().map(process);
 
-        let mut has_errors = false;
-        results.for_each(|result| {
-            match result {
-                Ok(task) => single::render(&task, &mut stdout()).unwrap(),
-                Err(err) => {
-                    has_errors = true;
-                    println!("{}", err);
-                }
+        let mut captured_error = None;
+        results.for_each(|result| match result {
+            Ok(task) => single::render(&task, &mut stdout()).unwrap(),
+            Err(err) => {
+                captured_error = Some(err.to_string());
             }
         });
 
-        if has_errors {
-            Err("Error occurred")
-        } else {
-            Ok(())
+        match captured_error {
+            Some(err) => Err(err),
+            None => Ok(())
         }
     }
 }

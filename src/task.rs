@@ -31,6 +31,7 @@ impl Task {
         }
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn create(
         id: u32,
         title: String,

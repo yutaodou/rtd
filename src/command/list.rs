@@ -63,7 +63,7 @@ fn render_list(result: &[&Task], list: &str, is_smart_list: bool) -> Result<(), 
     let tasks = result
         .iter()
         .filter(|task| task.is_in_list(list))
-        .map(|task| *task)
+        .cloned()
         .collect::<Vec<&Task>>();
 
     let render = list::Render {

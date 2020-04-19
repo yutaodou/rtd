@@ -20,7 +20,8 @@ impl<'a> Done<'a> {
 
 impl<'a> Command for Done<'a> {
     fn run(self: Self) -> Result<(), String> {
-        let results = self.args.values_of("INPUT").unwrap().map(process);
+        let mark_as_done = !self.args.is_present("unset");
+        let results = self.args.values_of("INPUT").unwrap().map(|task_id| process(task_id, mark_as_done));
 
         let mut captured_error = None;
         results.for_each(|result| match result {
@@ -37,17 +38,16 @@ impl<'a> Command for Done<'a> {
     }
 }
 
-fn process(input: &str) -> Result<Task, String> {
-    parse(input)
-        .and_then(|(task_id, done)| {
-            storage::get(task_id).and_then(|mut task| {
-                if done {
-                    task.mark_completed();
-                } else {
-                    task.mark_uncompleted();
-                }
-                Ok(task)
-            })
+fn process(input: &str, mark_as_done: bool) -> Result<Task, String> {
+    let task_id: u32 = input.parse().expect(format!("Invalid task id: {}", input).as_str());
+    storage::get(task_id)
+        .and_then(|mut task| {
+            if mark_as_done {
+                task.mark_completed();
+            } else {
+                task.mark_uncompleted();
+            }
+            Ok(task)
         })
         .and_then(|task| match storage::update(&task) {
             Ok(_) => Ok(task),
@@ -55,35 +55,3 @@ fn process(input: &str) -> Result<Task, String> {
         })
 }
 
-fn parse(value: &str) -> Result<(u32, bool), String> {
-    let mut task_id = value;
-    let mut done = true;
-    if value.starts_with('~') {
-        task_id = &value[1..];
-        done = false;
-    };
-    match task_id.parse() {
-        Ok(id) => Ok((id, done)),
-        Err(_) => Err(format!("Unknown task id: '{}'", task_id)),
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use crate::command::done::parse;
-
-    #[test]
-    fn test_parse() {
-        let (id, done) = parse("~123").unwrap();
-        assert_eq!(id, 123);
-        assert_eq!(done, false);
-
-        let (id, done) = parse("123").unwrap();
-        assert_eq!(id, 123);
-        assert_eq!(done, true);
-
-        let result = parse("asdf");
-        assert_eq!(result.is_err(), true);
-        assert_eq!(result.err(), Some(String::from("Unknown task id: 'asdf'")));
-    }
-}

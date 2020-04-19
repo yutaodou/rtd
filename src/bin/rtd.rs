@@ -72,7 +72,13 @@ fn main() {
                         .required(true)
                         .takes_value(true)
                         .multiple(true),
-                ),
+                ).arg(
+                Arg::with_name("unset")
+                    .short("u")
+                    .long("unset")
+                    .help("Mark task as not completed")
+                    .takes_value(false)
+            ),
         )
         .subcommand(
             SubCommand::with_name("today")

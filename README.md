@@ -30,8 +30,9 @@ rtd list inbox -a
 // Mark a todo as your today's priority
 rtd today <todo-id>
 
-// Unmark a todo from your today's priority by prefix it with a ~
-rtd today ~<todo-id>
+// Unmark a todo from your today's priority
+rtd today --unset <todo-id>
+rtd today -u <todo-id>
 ```
 
 **Edit todo**
@@ -46,6 +47,7 @@ rtd <task-id> "new-title" ~<new-list> +<priority>
 // mark task as done
 rtd done <task-id>
 
-// mark task as not done by prefix task id with a ~
-rtd done ~<task-id>
+// mark task as not done by prefix task id
+rtd done --unset task-id>
+rtd done -u task-id>
 ```

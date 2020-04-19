@@ -21,25 +21,31 @@ impl<'a> Done<'a> {
 impl<'a> Command for Done<'a> {
     fn run(self: Self) -> Result<(), String> {
         let mark_as_done = !self.args.is_present("unset");
-        let results = self.args.values_of("INPUT").unwrap().map(|task_id| process(task_id, mark_as_done));
+        let results = self
+            .args
+            .values_of("INPUT")
+            .unwrap()
+            .map(|task_id| process(task_id, mark_as_done));
 
         let mut captured_error = None;
         results.for_each(|result| match result {
             Ok(task) => single::render(&task, &mut stdout()).unwrap(),
             Err(err) => {
-                captured_error = Some(err.to_string());
+                captured_error = Some(err);
             }
         });
 
         match captured_error {
             Some(err) => Err(err),
-            None => Ok(())
+            None => Ok(()),
         }
     }
 }
 
 fn process(input: &str, mark_as_done: bool) -> Result<Task, String> {
-    let task_id: u32 = input.parse().expect(format!("Invalid task id: {}", input).as_str());
+    let task_id: u32 = input
+        .parse()
+        .unwrap_or_else(|_| panic!("Invalid task id: {}", input));
     storage::get(task_id)
         .and_then(|mut task| {
             if mark_as_done {
@@ -54,4 +60,3 @@ fn process(input: &str, mark_as_done: bool) -> Result<Task, String> {
             Err(error) => Err(error),
         })
 }
-

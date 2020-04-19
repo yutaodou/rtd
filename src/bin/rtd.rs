@@ -69,27 +69,36 @@ fn main() {
                 .about("Mark task as completed/un-completed")
                 .arg(
                     Arg::with_name("INPUT")
+                        .help("<task-id>")
                         .required(true)
                         .takes_value(true)
                         .multiple(true),
-                ).arg(
-                Arg::with_name("unset")
-                    .short("u")
-                    .long("unset")
-                    .help("Mark task as not completed")
-                    .takes_value(false)
-            ),
+                )
+                .arg(
+                    Arg::with_name("unset")
+                        .short("u")
+                        .long("unset")
+                        .help("Mark task as not completed")
+                        .takes_value(false),
+                ),
         )
         .subcommand(
             SubCommand::with_name("today")
                 .about("Mark/un-mark task as today's priority")
                 .arg(
                     Arg::with_name("INPUT")
-                        .help("<mark-task-id> / ~<un-mark-task-id>")
+                        .help("<task-id>")
                         .allow_hyphen_values(true)
                         .required(true)
                         .takes_value(true)
                         .multiple(true),
+                )
+                .arg(
+                    Arg::with_name("unset")
+                        .short("u")
+                        .long("unset")
+                        .help("Remove from today's priority")
+                        .takes_value(false),
                 ),
         )
         .get_matches();

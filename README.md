@@ -12,17 +12,19 @@ rtd add "This is a todo" :inbox +low
 
 **List todos**
 ```
-# list all todo not done yet
+# List all todo not done yet
 rtd list 
 
-# list completed todo
+# List completed todo
 rtd list --done
+rtd list -d
 
-# list all
+# List all
 rtd list --all
+rtd list -a
 
-# list all todo from a specific list
-rtd list inbox -a
+# List all todo from a specific list
+rtd list inbox
 ```
 
 **Today's priority**
@@ -38,16 +40,16 @@ rtd today -u <todo-id>
 **Edit todo**
 
 ```
-rtd <task-id> "new-title" ~<new-list> +<priority>
+rtd <todo-id> "new-title" :<new-list> +<priority>
 ```
 
 **Mark todo as completed**
 
 ```
-// mark task as done
-rtd done <task-id>
+// Mark todo as done
+rtd done <todo-id>
 
-// mark task as not done by prefix task id
-rtd done --unset task-id>
-rtd done -u task-id>
+// Mark todo as not done
+rtd done --unset <todo-id>
+rtd done -u <todo-id>
 ```

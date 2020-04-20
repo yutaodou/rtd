@@ -9,10 +9,10 @@ use rusqlite::{params, Connection, Row, NO_PARAMS};
 use crate::task::Task;
 
 fn database_file_path() -> PathBuf {
-    let mut path = dirs::home_dir().unwrap();
-    path.push(".rtd");
-    path.push("database");
-    path.set_extension("data");
+    let mut path = dirs::data_dir().unwrap();
+    path.push("rtd");
+    path.push("data");
+    path.set_extension("db");
     path
 }
 

@@ -119,6 +119,6 @@ fn run(opts: &ArgMatches) -> Result<(), String> {
         ("list", Some(list_opts)) => List::new(list_opts).run(),
         ("done", Some(done_opts)) => Done::new(done_opts).run(),
         ("today", Some(today_opts)) => Today::new(today_opts).run(),
-        (cmd, _) => Err(format!("Unsupported command: {}", cmd)),
+        (_, _) => Err(format!("Unknown command, for usage see 'rtd --help'")),
     }
 }

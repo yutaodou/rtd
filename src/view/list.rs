@@ -22,7 +22,7 @@ impl<'a> Render<'a> {
             let mut results = self.tasks.iter().map(|task| self.render_single(w, task));
             match results.find(|result| result.is_err()) {
                 Some(Err(err)) => Err(err.to_string()),
-                _ => Ok(())
+                _ => Ok(()),
             }
         }
     }

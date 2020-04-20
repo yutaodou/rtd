@@ -45,20 +45,18 @@ impl<'a> Command for Done<'a> {
 fn process(input: &str, mark_as_done: bool) -> Result<Task, String> {
     match input.parse() {
         Err(_) => Err(format!("Invalid task id: {}", input)),
-        Ok(task_id) => {
-            storage::get(task_id)
-                .and_then(|mut task| {
-                    if mark_as_done {
-                        task.mark_completed();
-                    } else {
-                        task.mark_uncompleted();
-                    }
-                    Ok(task)
-                })
-                .and_then(|task| match storage::update(&task) {
-                    Ok(_) => Ok(task),
-                    Err(error) => Err(error),
-                })
-        }
+        Ok(task_id) => storage::get(task_id)
+            .and_then(|mut task| {
+                if mark_as_done {
+                    task.mark_completed();
+                } else {
+                    task.mark_uncompleted();
+                }
+                Ok(task)
+            })
+            .and_then(|task| match storage::update(&task) {
+                Ok(_) => Ok(task),
+                Err(error) => Err(error),
+            }),
     }
 }

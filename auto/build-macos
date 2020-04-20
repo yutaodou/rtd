@@ -1,8 +1,6 @@
 #!/bin/sh
 
-TARGET=x86_64-apple-darwin
 CURRENT_DIR=$(dirname "$0")
 cd "$CURRENT_DIR"/..
 
-docker volume create rust-registry
-docker run -v $(pwd):/source -w /source -v rust-registry:/usr/local/cargo/registry rust sh -c "rustup target add ${TARGET} && cargo build --release --bin rtd --target ${TARGET}"
+cargo build --release --target x86_64-apple-darwin

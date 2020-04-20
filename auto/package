@@ -1,0 +1,12 @@
+#!/bin/sh
+
+set -eu
+
+CURRENT_DIR=$(dirname "$0")
+cd "$CURRENT_DIR"/..
+
+auto/build-macos
+auto/build-linux
+
+tar -cvf rtd-macos.tar -C target/x86_64-apple-darwin/release rtd
+tar -cvf rtd-linux.tar -C target/x86_64-unknown-linux-gnu/release rtd

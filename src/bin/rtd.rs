@@ -15,7 +15,7 @@ use rtd::command::Today;
 fn main() {
     let opts = App::new("Rust To Do")
         .version("v0.1")
-        .about("Manage to-dos in command line")
+        .about("Manage todos in command line")
         .subcommand(
             SubCommand::with_name("list")
                 .about("Lists todos")

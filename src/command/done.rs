@@ -43,20 +43,22 @@ impl<'a> Command for Done<'a> {
 }
 
 fn process(input: &str, mark_as_done: bool) -> Result<Task, String> {
-    let task_id: u32 = input
-        .parse()
-        .unwrap_or_else(|_| panic!("Invalid task id: {}", input));
-    storage::get(task_id)
-        .and_then(|mut task| {
-            if mark_as_done {
-                task.mark_completed();
-            } else {
-                task.mark_uncompleted();
-            }
-            Ok(task)
-        })
-        .and_then(|task| match storage::update(&task) {
-            Ok(_) => Ok(task),
-            Err(error) => Err(error),
-        })
+    match input.parse() {
+        Err(_) => Err(format!("Invalid task id: {}", input)),
+        Ok(task_id) => {
+            storage::get(task_id)
+                .and_then(|mut task| {
+                    if mark_as_done {
+                        task.mark_completed();
+                    } else {
+                        task.mark_uncompleted();
+                    }
+                    Ok(task)
+                })
+                .and_then(|task| match storage::update(&task) {
+                    Ok(_) => Ok(task),
+                    Err(error) => Err(error),
+                })
+        }
+    }
 }

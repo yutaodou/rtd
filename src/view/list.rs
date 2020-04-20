@@ -20,10 +20,9 @@ impl<'a> Render<'a> {
         } else {
             writeln!(w, "{}", self.list).unwrap();
             let mut results = self.tasks.iter().map(|task| self.render_single(w, task));
-            if results.any(|result| result.is_err()) {
-                Err(String::from("Failed to show list tasks"))
-            } else {
-                Ok(())
+            match results.find(|result| result.is_err()) {
+                Some(Err(err)) => Err(err.to_string()),
+                _ => Ok(())
             }
         }
     }

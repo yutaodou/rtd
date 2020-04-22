@@ -4,7 +4,7 @@ use std::result::Result;
 use clap::ArgMatches;
 
 use crate::command::Command;
-use crate::storage;
+use crate::db::storage;
 use crate::task::{Priority, Task};
 use crate::view::single;
 use std::str::FromStr;

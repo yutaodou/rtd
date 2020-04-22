@@ -173,5 +173,6 @@ pub mod test {
         task.mark_uncompleted();
         assert_eq!(task.done, false);
         assert_eq!(task.completed_at.is_some(), false);
+        t
     }
 }

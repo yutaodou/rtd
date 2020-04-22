@@ -3,7 +3,7 @@ use std::result::Result;
 use clap::ArgMatches;
 
 use crate::command::Command;
-use crate::storage;
+use crate::db::storage;
 use crate::task::Priority;
 use crate::view::single;
 use std::io::stdout;

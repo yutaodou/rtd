@@ -4,15 +4,17 @@ extern crate rtd;
 use std::process::exit;
 
 use clap::{App, Arg, ArgMatches, SubCommand};
-
 use rtd::command::Add;
 use rtd::command::Command;
 use rtd::command::Done;
 use rtd::command::Edit;
 use rtd::command::List;
 use rtd::command::Today;
+use rtd::db::migration;
 
 fn main() {
+    migration::migrate().unwrap();
+
     let opts = App::new("Rust To Do")
         .version("v0.1")
         .about("Manage todos in command line")

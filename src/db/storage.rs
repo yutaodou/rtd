@@ -1,41 +1,14 @@
 extern crate dirs;
 
 use std::fs::DirBuilder;
-use std::path::PathBuf;
 use std::result::Result;
 
 use rusqlite::{params, Connection, Row, NO_PARAMS};
 
 use crate::task::Task;
 
-fn database_file_path() -> PathBuf {
-    let mut path = dirs::data_dir().unwrap();
-    path.push("rtd");
-    path.push("data");
-    path.set_extension("db");
-    path
-}
-
-fn init_database() {
-    let conn = open_connection();
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS todo  (
-            id              INTEGER PRIMARY KEY,
-            title           TEXT NOT NULL,
-            done            INTEGER DEFAULT 0,
-            today           TEXT DEFAULT '',
-            list            TEXT DEFAULT '',
-            priority        TEXT DEFAULT 'medium',
-            created_at      INTEGER DEFAULT 0,
-            completed_at    INTEGER DEFAULT 0
-            )",
-        params![],
-    )
-    .unwrap();
-}
-
-fn open_connection() -> Connection {
-    let database_file_path = database_file_path();
+pub fn open_connection() -> Connection {
+    let database_file_path = super::database_file_path();
     let database_file_dir = database_file_path.parent().unwrap();
     if !database_file_dir.exists() {
         DirBuilder::new().create(database_file_dir).unwrap();
@@ -44,7 +17,6 @@ fn open_connection() -> Connection {
 }
 
 pub fn update(task: &Task) -> Result<&Task, String> {
-    init_database();
     let completed_at = match task.completed_at {
         Some(date) => date.timestamp(),
         None => 0,
@@ -66,7 +38,6 @@ pub fn update(task: &Task) -> Result<&Task, String> {
 }
 
 pub fn add(task: &Task) -> Result<Task, String> {
-    init_database();
     let conn = open_connection();
     conn.execute_named(
         "INSERT INTO todo (title, list, priority, created_at) VALUES (:title, :list, :priority, :created_at)",
@@ -104,8 +75,6 @@ pub fn get(task_id: u32) -> Result<Task, String> {
 }
 
 pub fn get_all() -> Result<Vec<Task>, String> {
-    init_database();
-
     let conn = open_connection();
     let mut stmt = conn.prepare("SELECT * FROM todo").unwrap();
     let todo_iter = stmt

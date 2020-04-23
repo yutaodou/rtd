@@ -31,30 +31,41 @@ impl<'a> Render<'a> {
     }
 
     fn render_single<W: Write>(self: &Self, w: &mut W, task: &Task) -> Result<(), Error> {
-        let title = if task.done { Style::new().strikethrough() } else { Style::default() }
-            .paint(&task.title);
-
-        let due_date = task.due_date.map_or(ANSIGenericString::from(""), |due_date| {
-            if due_date.lt(&Date::today()) && !task.done {
-                Style::default().fg(Red)
-            } else {
-                Style::default()
-            }.paint(format!("@{}", due_date.format("%F")))
-        });
-
-
         writeln!(
             w,
             "{:>4}. {} +{} {} {}",
             task.id,
-            title,
-            Style::default().paint(task.priority.to_string()),
-            Style::default().paint(if self.is_smart_list {
-                format!(":{}", task.list)
-            } else {
-                String::from("")
-            }),
-            due_date
+            title(task),
+            default_style(task.priority.to_string().as_str()),
+            list(task, self.is_smart_list),
+            due_date(task)
         )
     }
+}
+
+fn default_style(content: &str) -> ANSIGenericString<str> {
+    Style::default().paint(content)
+}
+
+fn title(task: &Task) -> ANSIGenericString<str> {
+    if task.done { Style::new().strikethrough() } else { Style::default() }
+        .paint(&task.title)
+}
+
+fn list(task: &Task, is_smart_list: bool) -> ANSIGenericString<str> {
+    Style::default().paint(if is_smart_list {
+        format!(":{}", task.list)
+    } else {
+        String::from("")
+    })
+}
+
+fn due_date(task: &Task) -> ANSIGenericString<str> {
+    task.due_date.map_or(ANSIGenericString::from(""), |due_date| {
+        if due_date.lt(&Date::today()) && !task.done {
+            Style::default().fg(Red)
+        } else {
+            Style::default()
+        }.paint(format!("@{}", due_date.format("%F")))
+    })
 }

@@ -3,10 +3,12 @@ extern crate time;
 
 use std::fs::DirBuilder;
 use std::result::Result;
+use std::str::FromStr;
 
 use rusqlite::{params, Connection, Row, NO_PARAMS};
 
-use crate::task::Task;
+use self::time::{Date, OffsetDateTime};
+use crate::task::{Task, Priority};
 
 fn open_connection() -> Connection {
     let database_file_path = super::database_file_path();
@@ -87,15 +89,34 @@ pub fn get_all() -> Result<Vec<Task>, String> {
 }
 
 fn map_to_task(row: &Row) -> Task {
+    let due_date = row.get("due_date").ok()
+        .map(|due_date: String| {
+            if due_date.is_empty() {
+                None
+            } else {
+                Date::parse(due_date, "%F").ok()
+            }
+        })
+        .flatten();
+
+
+    let completed_time = row.get("completed_at").ok()
+        .map(|completed_at| if completed_at == 0 {
+            None
+        } else {
+            Some(OffsetDateTime::from_unix_timestamp(completed_at))
+        })
+        .flatten();
+
     Task::create(
         row.get("id").unwrap(),
         row.get("title").unwrap(),
-        row.get("done").unwrap(),
+        row.get("done").ok().map_or(false, |done: u8| done == 1),
         row.get("list").unwrap(),
-        row.get("priority").unwrap(),
+        row.get("priority").ok().map_or(Priority::Medium, |priority: String| Priority::from_str(&priority).unwrap()),
         row.get("today").unwrap(),
-        row.get("created_at").unwrap(),
-        row.get("completed_at").unwrap(),
-        row.get("due_date").unwrap(),
+        row.get("created_at").ok().map(|created_at: i64| OffsetDateTime::from_unix_timestamp(created_at)).unwrap(),
+        completed_time,
+        due_date,
     )
 }

@@ -54,7 +54,7 @@ impl Command for Add {
             self.title.clone(),
             self.list.clone(),
             self.priority,
-            self.due_date
+            self.due_date,
         );
         let result = storage::add(&new_task)?;
         single::render(&result, &mut stdout())?;
@@ -74,8 +74,14 @@ mod test {
 
     #[test]
     fn test_parse_due_date() {
-        assert_eq!(parse_due_date("20200202").unwrap(), time::date!(2020-02-02));
-        assert_eq!(parse_due_date("2020-02-02").unwrap(), time::date!(2020-02-02));
+        assert_eq!(
+            parse_due_date("20200202").unwrap(),
+            time::date!(2020 - 02 - 02)
+        );
+        assert_eq!(
+            parse_due_date("2020-02-02").unwrap(),
+            time::date!(2020 - 02 - 02)
+        );
         assert_eq!(parse_due_date("2020"), None);
     }
 }

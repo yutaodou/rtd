@@ -1,8 +1,8 @@
 extern crate time;
 
+use self::time::Date;
 use std::str::FromStr;
 use time::OffsetDateTime;
-use self::time::Date;
 
 pub const SMART_LISTS: &[&str; 1] = &["today"];
 
@@ -38,30 +38,24 @@ impl Task {
     pub fn create(
         id: u32,
         title: String,
-        done: u8,
+        done: bool,
         list: String,
-        priority: String,
+        priority: Priority,
         today: String,
-        created_at: i64,
-        completed_at: i64,
-        due_date: String,
+        created_at: OffsetDateTime,
+        completed_at: Option<OffsetDateTime>,
+        due_date: Option<Date>,
     ) -> Task {
-        let completed_time = if completed_at == 0 {
-            None
-        } else {
-            Some(OffsetDateTime::from_unix_timestamp(completed_at))
-        };
-
         Task {
             id,
             title,
-            done: done == 1,
+            done,
             today,
             list,
-            priority: Priority::from_str(&priority).unwrap(),
-            created_at: OffsetDateTime::from_unix_timestamp(created_at),
-            completed_at: completed_time,
-            due_date: if due_date.is_empty() { None } else { Date::parse(due_date, "%F").ok() },
+            priority,
+            created_at,
+            completed_at,
+            due_date,
         }
     }
 
@@ -144,7 +138,7 @@ pub mod test {
 
     #[test]
     fn test_mark_for_today() {
-        let mut task = Task::new("test-todo".to_string(), "inbox".to_string(), Priority::High);
+        let mut task = Task::new("test-todo".to_string(), "inbox".to_string(), Priority::High, None);
 
         task.mark_for_today();
         assert_eq!(task.is_marked_for_today(), true);
@@ -155,7 +149,7 @@ pub mod test {
 
     #[test]
     fn test_in_list() {
-        let mut task = Task::new("test-todo".to_string(), "inbox".to_string(), Priority::High);
+        let mut task = Task::new("test-todo".to_string(), "inbox".to_string(), Priority::High, None);
 
         task.mark_for_today();
         assert_eq!(task.is_in_list("Today"), true);
@@ -167,7 +161,7 @@ pub mod test {
 
     #[test]
     fn test_mark_completed() {
-        let mut task = Task::new("test-todo".to_string(), "inbox".to_string(), Priority::High);
+        let mut task = Task::new("test-todo".to_string(), "inbox".to_string(), Priority::High, None);
 
         assert!(task.completed_at.is_none());
 

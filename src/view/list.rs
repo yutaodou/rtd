@@ -2,10 +2,10 @@ extern crate time;
 
 use std::io::{Error, Write};
 
-use ansi_term::{Style, ANSIGenericString};
-use ansi_term::Colour::Red;
-use crate::task::Task;
 use self::time::Date;
+use crate::task::Task;
+use ansi_term::Colour::Red;
+use ansi_term::{ANSIGenericString, Style};
 
 pub struct Render<'a> {
     pub tasks: &'a Vec<&'a Task>,
@@ -48,8 +48,12 @@ fn default_style(content: &str) -> ANSIGenericString<str> {
 }
 
 fn title(task: &Task) -> ANSIGenericString<str> {
-    if task.done { Style::new().strikethrough() } else { Style::default() }
-        .paint(&task.title)
+    if task.done {
+        Style::new().strikethrough()
+    } else {
+        Style::default()
+    }
+    .paint(&task.title)
 }
 
 fn list(task: &Task, is_smart_list: bool) -> ANSIGenericString<str> {
@@ -61,11 +65,13 @@ fn list(task: &Task, is_smart_list: bool) -> ANSIGenericString<str> {
 }
 
 fn due_date(task: &Task) -> ANSIGenericString<str> {
-    task.due_date.map_or(ANSIGenericString::from(""), |due_date| {
-        if due_date.lt(&Date::today()) && !task.done {
-            Style::default().fg(Red)
-        } else {
-            Style::default()
-        }.paint(format!("@{}", due_date.format("%F")))
-    })
+    task.due_date
+        .map_or(ANSIGenericString::from(""), |due_date| {
+            if due_date.lt(&Date::today()) && !task.done {
+                Style::default().fg(Red)
+            } else {
+                Style::default()
+            }
+            .paint(format!("@{}", due_date.format("%F")))
+        })
 }

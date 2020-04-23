@@ -11,7 +11,8 @@ pub fn render<W: Write>(task: &Task, w: &mut W) -> Result<(), String> {
         task.title,
         task.list,
         task.priority.to_string(),
-        task.due_date.map_or("".to_string(), |date| format!(" @{}", date.format("%F"))),
+        task.due_date
+            .map_or("".to_string(), |date| format!(" @{}", date.format("%F"))),
     );
     writeln!(w, "{}", result).unwrap();
     Ok(())

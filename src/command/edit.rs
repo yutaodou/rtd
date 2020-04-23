@@ -59,7 +59,7 @@ impl Edit {
 }
 
 impl Command for Edit {
-    fn run(self) -> Result<(), String> {
+    fn run(self: Self) -> Result<(), String> {
         let result = storage::get(self.task_id)
             .and_then(move |mut task| {
                 if let Some(new_list) = self.list {

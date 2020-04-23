@@ -22,7 +22,7 @@ impl Add {
     pub fn new(args: &ArgMatches) -> Add {
         let mut title = String::new();
         let mut list = String::from("inbox");
-        let mut priority = Priority::Medium;
+        let mut priority = Priority::default();
         let mut due_date = None;
         args.values_of("INPUT").unwrap().for_each(|arg| {
             if arg.starts_with(':') && arg.len() > 1 {

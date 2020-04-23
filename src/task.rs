@@ -123,6 +123,12 @@ impl FromStr for Priority {
     }
 }
 
+impl Default for Priority {
+    fn default() -> Self {
+        Priority::Medium
+    }
+}
+
 #[cfg(test)]
 pub mod test {
     use crate::task::{Priority, Task};
@@ -138,7 +144,12 @@ pub mod test {
 
     #[test]
     fn test_mark_for_today() {
-        let mut task = Task::new("test-todo".to_string(), "inbox".to_string(), Priority::High, None);
+        let mut task = Task::new(
+            "test-todo".to_string(),
+            "inbox".to_string(),
+            Priority::High,
+            None,
+        );
 
         task.mark_for_today();
         assert_eq!(task.is_marked_for_today(), true);
@@ -149,7 +160,12 @@ pub mod test {
 
     #[test]
     fn test_in_list() {
-        let mut task = Task::new("test-todo".to_string(), "inbox".to_string(), Priority::High, None);
+        let mut task = Task::new(
+            "test-todo".to_string(),
+            "inbox".to_string(),
+            Priority::High,
+            None,
+        );
 
         task.mark_for_today();
         assert_eq!(task.is_in_list("Today"), true);
@@ -161,7 +177,12 @@ pub mod test {
 
     #[test]
     fn test_mark_completed() {
-        let mut task = Task::new("test-todo".to_string(), "inbox".to_string(), Priority::High, None);
+        let mut task = Task::new(
+            "test-todo".to_string(),
+            "inbox".to_string(),
+            Priority::High,
+            None,
+        );
 
         assert!(task.completed_at.is_none());
 

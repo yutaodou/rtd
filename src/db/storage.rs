@@ -126,7 +126,7 @@ fn map_to_task(row: &Row) -> Task {
         row.get("today").unwrap(),
         row.get("created_at")
             .ok()
-            .map(|created_at: i64| OffsetDateTime::from_unix_timestamp(created_at))
+            .map(OffsetDateTime::from_unix_timestamp)
             .unwrap(),
         completed_time,
         due_date,

@@ -1,15 +1,13 @@
 use std::io::stdout;
 use std::result::Result;
-
+use std::str::FromStr;
+use time::Date;
 use clap::ArgMatches;
 
 use crate::command::Command;
 use crate::db::storage;
 use crate::task::{Priority, Task};
 use crate::view::single;
-use std::borrow::Borrow;
-use std::str::FromStr;
-use time::Date;
 
 #[derive(Debug)]
 pub struct Add {
@@ -58,8 +56,8 @@ impl Add {
         match &self.due_date {
             None => Ok(None),
             Some(input) => Date::parse(&input, "%F")
-                .or(Date::parse(&input, "%-Y%m%d"))
-                .map(|date| Some(date))
+                .or_else(|_| Date::parse(&input, "%-Y%m%d"))
+                .map(Some)
                 .map_err(|_| format!("Invalid due date: {}", input)),
         }
     }
@@ -67,14 +65,13 @@ impl Add {
 
 impl Command for Add {
     fn run(self: Self) -> Result<(), String> {
-        let add = self.borrow();
-        if add.title == None {
+        if self.title == None {
             return Err("Missing title for todo.".to_string());
         }
 
         let new_task = Task::new(
             self.title.clone().unwrap(),
-            self.list.clone().unwrap_or("inbox".to_string()),
+            self.list.clone().unwrap_or_else(|| "inbox".to_string()),
             self.parse_priority()?,
             self.parse_due_date()?,
         );

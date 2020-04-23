@@ -2,6 +2,7 @@ extern crate time;
 
 use std::str::FromStr;
 use time::OffsetDateTime;
+use self::time::Date;
 
 pub const SMART_LISTS: &[&str; 1] = &["today"];
 
@@ -15,10 +16,11 @@ pub struct Task {
     pub priority: Priority,
     pub created_at: OffsetDateTime,
     pub completed_at: Option<OffsetDateTime>,
+    pub due_date: Option<Date>,
 }
 
 impl Task {
-    pub fn new(title: String, list: String, priority: Priority) -> Task {
+    pub fn new(title: String, list: String, priority: Priority, due_date: Option<Date>) -> Task {
         Task {
             id: 0,
             title,
@@ -28,6 +30,7 @@ impl Task {
             priority,
             created_at: OffsetDateTime::now(),
             completed_at: None,
+            due_date,
         }
     }
 
@@ -41,6 +44,7 @@ impl Task {
         today: String,
         created_at: i64,
         completed_at: i64,
+        due_date: String,
     ) -> Task {
         let completed_time = if completed_at == 0 {
             None
@@ -57,6 +61,7 @@ impl Task {
             priority: Priority::from_str(&priority).unwrap(),
             created_at: OffsetDateTime::from_unix_timestamp(created_at),
             completed_at: completed_time,
+            due_date: if due_date.is_empty() { None } else { Date::parse(due_date, "%F").ok() },
         }
     }
 
@@ -173,6 +178,5 @@ pub mod test {
         task.mark_uncompleted();
         assert_eq!(task.done, false);
         assert_eq!(task.completed_at.is_some(), false);
-        t
     }
 }

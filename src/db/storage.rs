@@ -1,4 +1,5 @@
 extern crate dirs;
+extern crate time;
 
 use std::fs::DirBuilder;
 use std::result::Result;
@@ -7,7 +8,7 @@ use rusqlite::{params, Connection, Row, NO_PARAMS};
 
 use crate::task::Task;
 
-pub fn open_connection() -> Connection {
+fn open_connection() -> Connection {
     let database_file_path = super::database_file_path();
     let database_file_dir = database_file_path.parent().unwrap();
     if !database_file_dir.exists() {
@@ -17,14 +18,9 @@ pub fn open_connection() -> Connection {
 }
 
 pub fn update(task: &Task) -> Result<&Task, String> {
-    let completed_at = match task.completed_at {
-        Some(date) => date.timestamp(),
-        None => 0,
-    };
-
     let conn = open_connection();
     conn.execute_named(
-        "UPDATE todo SET title = :title, list = :list, done = :done, today = :today, priority = :priority, completed_at = :completed_at WHERE id = :id",
+        "UPDATE todo SET title = :title, list = :list, done = :done, today = :today, priority = :priority, completed_at = :completed_at, due_date = :due_date WHERE id = :id",
         &[
             (":title", &task.title),
             (":list", &task.list.as_str()),
@@ -32,7 +28,8 @@ pub fn update(task: &Task) -> Result<&Task, String> {
             (":done", if task.done { &1 } else { &0 }),
             (":today", &task.today),
             (":id", &task.id),
-            (":completed_at", &completed_at),
+            (":completed_at", &task.completed_at.map_or(0, |date| date.timestamp())),
+            (":due_date", &task.due_date.map_or("".to_string(), |date| date.format("%F"))),
         ]).unwrap();
     Ok(task)
 }
@@ -40,12 +37,13 @@ pub fn update(task: &Task) -> Result<&Task, String> {
 pub fn add(task: &Task) -> Result<Task, String> {
     let conn = open_connection();
     conn.execute_named(
-        "INSERT INTO todo (title, list, priority, created_at) VALUES (:title, :list, :priority, :created_at)",
+        "INSERT INTO todo (title, list, priority, due_date, created_at) VALUES (:title, :list, :priority, :due_date, :created_at)",
         &[
             (":title", &task.title),
             (":list", &task.list.as_str()),
             (":priority", &task.priority.to_string()),
             (":created_at", &task.created_at.timestamp()),
+            (":due_date", &task.due_date.map_or("".to_string(), |date| date.format("%F"))),
         ],
     )
         .unwrap();
@@ -98,5 +96,6 @@ fn map_to_task(row: &Row) -> Task {
         row.get("today").unwrap(),
         row.get("created_at").unwrap(),
         row.get("completed_at").unwrap(),
+        row.get("due_date").unwrap(),
     )
 }

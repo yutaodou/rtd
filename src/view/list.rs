@@ -1,8 +1,11 @@
+extern crate time;
+
 use std::io::{Error, Write};
 
-use ansi_term::Style;
-
+use ansi_term::{Style, ANSIGenericString};
+use ansi_term::Colour::Red;
 use crate::task::Task;
+use self::time::Date;
 
 pub struct Render<'a> {
     pub tasks: &'a Vec<&'a Task>,
@@ -28,15 +31,21 @@ impl<'a> Render<'a> {
     }
 
     fn render_single<W: Write>(self: &Self, w: &mut W, task: &Task) -> Result<(), Error> {
-        let title = if task.done {
-            Style::new().strikethrough().paint(&task.title)
-        } else {
-            Style::default().paint(&task.title)
-        };
+        let title = if task.done { Style::new().strikethrough() } else { Style::default() }
+            .paint(&task.title);
+
+        let due_date = task.due_date.map_or(ANSIGenericString::from(""), |due_date| {
+            if due_date.lt(&Date::today()) && !task.done {
+                Style::default().fg(Red)
+            } else {
+                Style::default()
+            }.paint(format!("@{}", due_date.format("%F")))
+        });
+
 
         writeln!(
             w,
-            "{:>4}. {} +{} {}",
+            "{:>4}. {} +{} {} {}",
             task.id,
             title,
             Style::default().paint(task.priority.to_string()),
@@ -45,6 +54,7 @@ impl<'a> Render<'a> {
             } else {
                 String::from("")
             }),
+            due_date
         )
     }
 }

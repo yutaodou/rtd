@@ -53,7 +53,7 @@ rtd today -u <todo-id>
 **Edit todo**
 
 ```
-rtd <todo-id> "new-title" :<new-list> +<priority> @Monday
+rtd <todo-id> "new-title" :<new-list> +<priority> @<due-date>
 ```
 
 **Mark todo as completed**

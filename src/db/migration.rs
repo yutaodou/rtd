@@ -17,7 +17,6 @@ fn create_database_dir() -> AnyResult<()> {
             if !database_file_dir.exists() {
                 DirBuilder::new().create(database_file_dir).unwrap();
             }
-            ()
         })
         .ok_or_else(|| AnyError::msg("Failed to create database dir."))
 }

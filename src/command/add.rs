@@ -1,9 +1,8 @@
+use clap::ArgMatches;
 use std::io::stdout;
 use std::result::Result;
-use std::str::FromStr;
-use time::Date;
-use clap::ArgMatches;
 
+use crate::command::todo_args::ToDoArgs;
 use crate::command::Command;
 use crate::db::storage;
 use crate::task::{Priority, Task};
@@ -11,69 +10,30 @@ use crate::view::single;
 
 #[derive(Debug)]
 pub struct Add {
-    title: Option<String>,
-    list: Option<String>,
-    priority: Option<String>,
-    due_date: Option<String>,
+    args: ToDoArgs,
 }
 
 impl Add {
     pub fn new(args: &ArgMatches) -> Add {
-        let extract = |arg: &str| arg.get(1..arg.len()).map(|a| a.to_string());
-
-        let mut title = None;
-        let mut list = None;
-        let mut priority = None;
-        let mut due_date = None;
-        args.values_of("INPUT").unwrap().for_each(|arg| {
-            if arg.starts_with(':') && arg.len() > 1 {
-                list = extract(arg);
-            } else if arg.starts_with('+') && arg.len() > 1 {
-                priority = extract(arg);
-            } else if arg.starts_with('@') && arg.len() > 1 {
-                due_date = extract(arg);
-            } else {
-                title = Some(arg.to_string());
-            }
-        });
-
         Add {
-            title,
-            list,
-            priority,
-            due_date,
-        }
-    }
-
-    fn parse_priority(self: &Self) -> Result<Priority, String> {
-        match &self.priority {
-            None => Ok(Priority::default()),
-            Some(input) => Priority::from_str(input.as_str()),
-        }
-    }
-
-    fn parse_due_date(self: &Self) -> Result<Option<Date>, String> {
-        match &self.due_date {
-            None => Ok(None),
-            Some(input) => Date::parse(&input, "%F")
-                .or_else(|_| Date::parse(&input, "%-Y%m%d"))
-                .map(Some)
-                .map_err(|_| format!("Invalid due date: {}", input)),
+            args: ToDoArgs::parse(args),
         }
     }
 }
 
 impl Command for Add {
     fn run(self: Self) -> Result<(), String> {
-        if self.title == None {
+        let args = self.args;
+        let title = args.free_args.get(0);
+        if title == None {
             return Err("Missing title for todo.".to_string());
         }
 
         let new_task = Task::new(
-            self.title.clone().unwrap(),
-            self.list.clone().unwrap_or_else(|| "inbox".to_string()),
-            self.parse_priority()?,
-            self.parse_due_date()?,
+            title.map(|a| a.to_string()).unwrap(),
+            args.list.clone().unwrap_or_else(|| "inbox".to_string()),
+            args.parse_priority()?.or(Some(Priority::Medium)).unwrap(),
+            args.parse_due_date()?,
         );
         let result = storage::add(&new_task)?;
         single::render(&result, &mut stdout())?;
@@ -83,15 +43,15 @@ impl Command for Add {
 
 #[cfg(test)]
 mod test {
-    use crate::command::Add;
+    use crate::command::todo_args::ToDoArgs;
 
     #[test]
     fn test_parse_due_date() {
-        let mut add = Add {
-            title: None,
+        let mut add = ToDoArgs {
             list: None,
             due_date: Some("20200202".to_string()),
             priority: None,
+            free_args: vec![],
         };
         assert_eq!(
             add.parse_due_date().unwrap(),

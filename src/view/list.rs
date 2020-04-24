@@ -1,11 +1,9 @@
-extern crate time;
-
-use std::io::{Error, Write};
-
-use self::time::Date;
-use crate::task::Task;
 use ansi_term::Colour::Red;
 use ansi_term::{ANSIGenericString, Style};
+use std::io::{Error, Write};
+use time::OffsetDateTime;
+
+use crate::task::Task;
 
 pub struct Render<'a> {
     pub tasks: &'a Vec<&'a Task>,
@@ -67,7 +65,7 @@ fn list(task: &Task, is_smart_list: bool) -> ANSIGenericString<str> {
 fn due_date(task: &Task) -> ANSIGenericString<str> {
     task.due_date
         .map_or(ANSIGenericString::from(""), |due_date| {
-            if due_date.lt(&Date::today()) && !task.done {
+            if due_date.lt(&OffsetDateTime::now().date()) && !task.done {
                 Style::default().fg(Red)
             } else {
                 Style::default()

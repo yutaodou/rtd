@@ -1,87 +1,65 @@
+use clap::ArgMatches;
+use std::borrow::Borrow;
+use std::io::stdout;
 use std::result::Result;
 
-use clap::ArgMatches;
-
+use crate::command::todo_args::ToDoArgs;
 use crate::command::Command;
 use crate::db::storage;
-use crate::task::Priority;
 use crate::view::single;
-use std::io::stdout;
-use std::str::FromStr;
 
 #[derive(Debug)]
 pub struct Edit {
-    task_id: u32,
-    title: Option<String>,
-    list: Option<String>,
-    priority: Option<Priority>,
+    args: ToDoArgs,
 }
 
 impl Edit {
     pub fn new(args: &ArgMatches) -> Edit {
-        let task_id: u32;
-        let mut title = None;
-        let mut list = None;
-        let mut priority = None;
-        let mut free_args = vec![];
-
-        args.values_of("INPUT").unwrap().for_each(|arg| {
-            if arg.starts_with(':') && arg.len() > 1 {
-                list = Some(arg.get(1..arg.len()).unwrap().to_string());
-            } else if arg.starts_with('+') && arg.len() > 1 {
-                priority = Some(
-                    arg.get(1..arg.len())
-                        .map(|p| Priority::from_str(p).unwrap())
-                        .unwrap(),
-                );
-            } else {
-                free_args.push(arg);
-            }
-        });
-
-        if free_args.is_empty() {
-            panic!("Todo id not provided.");
-        }
-
-        task_id = free_args.get(0).unwrap().parse().unwrap();
-
-        if free_args.len() == 2 {
-            title = Some((*free_args.get(1).unwrap()).to_string());
-        }
-
         Edit {
-            task_id,
-            title,
-            list,
-            priority,
+            args: ToDoArgs::parse(args),
         }
     }
 }
 
 impl Command for Edit {
     fn run(self: Self) -> Result<(), String> {
-        let result = storage::get(self.task_id)
-            .and_then(move |mut task| {
-                if let Some(new_list) = self.list {
-                    task.list = new_list;
+        let args = self.args;
+
+        let task_id = match args.free_args.get(0) {
+            None => Err("Task id required.".to_string()),
+            Some(input) => input.parse::<u32>().map_err(|a| a.to_string()),
+        }?;
+
+        storage::get(task_id)
+            .and_then(|mut task| {
+                if let Some(new_list) = args.list.borrow() {
+                    task.list = new_list.to_string();
                 }
 
-                if let Some(new_priority) = self.priority {
-                    task.priority = new_priority;
+                if let Some(new_title) = args.free_args.get(1) {
+                    task.title = new_title.to_string();
                 }
 
-                if let Some(new_title) = self.title {
-                    task.title = new_title;
-                }
+                args.parse_priority().and_then(|priority| match priority {
+                    Some(new_priority) => {
+                        task.priority = new_priority;
+                        Ok(())
+                    }
+                    _ => Ok(()),
+                })?;
+
+                args.parse_due_date().and_then(|due_date| match due_date {
+                    Some(new_due_date) => {
+                        task.due_date = Some(new_due_date);
+                        Ok(())
+                    }
+                    _ => Ok(()),
+                })?;
+
                 Ok(task)
             })
             .and_then(|update_task| {
                 storage::update(&update_task).and_then(|task| single::render(task, &mut stdout()))
-            });
-
-        match result {
-            Ok(_) => Ok(()),
-            Err(_) => Err(String::from("Failed to edit task")),
-        }
+            })
     }
 }

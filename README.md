@@ -3,7 +3,7 @@
 Manage your todo in command line with `rtd` (Rust To Do)
 
 ## Features
-#### Add a todo
+### Add a todo
 
 ```
 // Add a new to-do to inbox as low priority, which dues at 24th Apr 2020
@@ -23,7 +23,7 @@ rtd add "This is a todo" :inbox +low  @2020-04-24
 - Mon / Tues / Thur
 
 
-**List todos**
+### List todos
 ```
 # List all todo not done yet
 rtd list 
@@ -40,7 +40,7 @@ rtd list -a
 rtd list inbox
 ```
 
-**Today's priority**
+### Today's priority
 ```
 // Mark a todo as your today's priority
 rtd today <todo-id>
@@ -50,13 +50,13 @@ rtd today --unset <todo-id>
 rtd today -u <todo-id>
 ```
 
-**Edit todo**
+### Edit todo
 
 ```
 rtd <todo-id> "new-title" :<new-list> +<priority> @<due-date>
 ```
 
-**Mark todo as completed**
+### Mark todo as completed
 
 ```
 // Mark todo as done

@@ -19,7 +19,7 @@ rtd add "This is a todo" :inbox +low  @2020-04-24
 - 2020-04-01
 - 20200401
 - today / tomorrow
-- Monday / Tuesday /Wed...
+- Monday / Tuesday / Wed...
 - Mon / Tues / Thur
 
 

@@ -65,7 +65,7 @@ fn list(task: &Task, is_smart_list: bool) -> ANSIGenericString<str> {
 fn due_date(task: &Task) -> ANSIGenericString<str> {
     task.due_date
         .map_or(ANSIGenericString::from(""), |due_date| {
-            if due_date.lt(&OffsetDateTime::now().date()) && !task.done {
+            if due_date.lt(&OffsetDateTime::now_local().date()) && !task.done {
                 Style::default().fg(Red)
             } else {
                 Style::default()

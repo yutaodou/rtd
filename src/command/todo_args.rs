@@ -33,8 +33,9 @@ impl ToDoArgs {
         }
     }
 
-    fn smart_date<F>(input: &str, now: F) -> Result<Date, String>
-        where F: Fn() -> OffsetDateTime
+    pub fn smart_date<F>(input: &str, now: F) -> Result<Date, String>
+    where
+        F: Fn() -> OffsetDateTime,
     {
         let today = now().date();
 
@@ -50,21 +51,21 @@ impl ToDoArgs {
             "tomorrow" => Some(today.weekday().next()),
             _ => None,
         }
-            .map(|due_date_weekday| {
-                let today_weekday = today.weekday();
+        .map(|due_date_weekday| {
+            let today_weekday = today.weekday();
 
-                let diff_days = due_date_weekday.number_days_from_monday() as i64
-                    - today_weekday.number_days_from_monday() as i64;
+            let diff_days = due_date_weekday.number_days_from_monday() as i64
+                - today_weekday.number_days_from_monday() as i64;
 
-                let duration_offset = if diff_days >= 0 {
-                    Duration::days(diff_days)
-                } else {
-                    Duration::days(diff_days + 7)
-                };
+            let duration_offset = if diff_days >= 0 {
+                Duration::days(diff_days)
+            } else {
+                Duration::days(diff_days + 7)
+            };
 
-                today.add(duration_offset)
-            })
-            .ok_or_else(|| format!("Unknown due date: {}", input))
+            today.add(duration_offset)
+        })
+        .ok_or_else(|| format!("Unknown due date: {}", input))
     }
 
     pub fn parse(args: &ArgMatches) -> ToDoArgs {

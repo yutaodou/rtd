@@ -5,7 +5,7 @@ use clap::ArgMatches;
 
 use crate::command::Command;
 use crate::db::storage;
-use crate::task::Task;
+use crate::model::Task;
 use crate::view::single;
 
 pub struct Done<'a> {

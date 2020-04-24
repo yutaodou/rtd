@@ -1,7 +1,7 @@
-use time::Date;
 use time::OffsetDateTime;
 
 use super::Priority;
+use super::SmartDate;
 
 pub const SMART_LISTS: &[&str; 1] = &["today"];
 
@@ -15,11 +15,16 @@ pub struct Task {
     pub priority: Priority,
     pub created_at: OffsetDateTime,
     pub completed_at: Option<OffsetDateTime>,
-    pub due_date: Option<Date>,
+    pub due_date: Option<SmartDate>,
 }
 
 impl Task {
-    pub fn new(title: String, list: String, priority: Priority, due_date: Option<Date>) -> Task {
+    pub fn new(
+        title: String,
+        list: String,
+        priority: Priority,
+        due_date: Option<SmartDate>,
+    ) -> Task {
         Task {
             id: 0,
             title,
@@ -43,7 +48,7 @@ impl Task {
         today: String,
         created_at: OffsetDateTime,
         completed_at: Option<OffsetDateTime>,
-        due_date: Option<Date>,
+        due_date: Option<SmartDate>,
     ) -> Task {
         Task {
             id,
@@ -90,12 +95,19 @@ impl Task {
     fn today() -> String {
         OffsetDateTime::now().format("%F")
     }
+
+    pub fn is_overdue(&self) -> bool {
+        !self.done
+            && self.due_date.as_ref().map_or_else(
+                || false,
+                |due_date| OffsetDateTime::now_local().date().gt(&due_date),
+            )
+    }
 }
 
 #[cfg(test)]
 pub mod test {
-    use crate::task::{Priority, Task};
-    use std::str::FromStr;
+    use crate::model::{Priority, Task};
 
     #[test]
     fn test_mark_for_today() {

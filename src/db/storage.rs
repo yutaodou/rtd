@@ -1,14 +1,11 @@
-extern crate dirs;
-extern crate time;
-
 use std::fs::DirBuilder;
 use std::result::Result;
 use std::str::FromStr;
 
 use rusqlite::{params, Connection, Row, NO_PARAMS};
 
-use self::time::{Date, OffsetDateTime};
-use crate::task::{Priority, Task};
+use crate::model::{Priority, SmartDate, Task};
+use time::OffsetDateTime;
 
 fn open_connection() -> Connection {
     let database_file_path = super::database_file_path();
@@ -31,7 +28,7 @@ pub fn update(task: &Task) -> Result<&Task, String> {
             (":today", &task.today),
             (":id", &task.id),
             (":completed_at", &task.completed_at.map_or(0, |date| date.timestamp())),
-            (":due_date", &task.due_date.map_or("".to_string(), |date| date.format("%F"))),
+            (":due_date", &task.due_date.as_ref().map_or("".to_string(), |date| date.format("%F"))),
         ]).unwrap();
     Ok(task)
 }
@@ -45,7 +42,7 @@ pub fn add(task: &Task) -> Result<Task, String> {
             (":list", &task.list.as_str()),
             (":priority", &task.priority.to_string()),
             (":created_at", &task.created_at.timestamp()),
-            (":due_date", &task.due_date.map_or("".to_string(), |date| date.format("%F"))),
+            (":due_date", &task.due_date.as_ref().map_or("".to_string(), |date| date.format("%F"))),
         ],
     )
         .unwrap();
@@ -96,7 +93,7 @@ fn map_to_task(row: &Row) -> Task {
             if due_date.is_empty() {
                 None
             } else {
-                Date::parse(due_date, "%F").ok()
+                SmartDate::from_str(due_date.as_str()).ok()
             }
         })
         .flatten();

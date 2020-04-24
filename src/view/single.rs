@@ -1,6 +1,6 @@
 use std::io::Write;
 
-use crate::task::Task;
+use crate::model::Task;
 
 pub fn render<W: Write>(task: &Task, w: &mut W) -> Result<(), String> {
     let done = if task.done { "x" } else { "-" };
@@ -12,7 +12,8 @@ pub fn render<W: Write>(task: &Task, w: &mut W) -> Result<(), String> {
         task.list,
         task.priority.to_string(),
         task.due_date
-            .map_or("".to_string(), |date| format!(" @{}", date.format("%F"))),
+            .as_ref()
+            .map_or("".to_string(), |date| format!(" @{}", date)),
     );
     writeln!(w, "{}", result).unwrap();
     Ok(())

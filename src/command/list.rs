@@ -5,7 +5,7 @@ use clap::ArgMatches;
 
 use crate::command::Command;
 use crate::db::storage;
-use crate::task::{Task, SMART_LISTS};
+use crate::model::{Task, SMART_LISTS};
 use crate::view::list;
 
 #[derive(Debug)]

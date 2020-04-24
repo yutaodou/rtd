@@ -1,9 +1,8 @@
 use ansi_term::Colour::Red;
 use ansi_term::{ANSIGenericString, Style};
 use std::io::{Error, Write};
-use time::OffsetDateTime;
 
-use crate::task::Task;
+use crate::model::Task;
 
 pub struct Render<'a> {
     pub tasks: &'a Vec<&'a Task>,
@@ -35,8 +34,8 @@ impl<'a> Render<'a> {
             task.id,
             title(task),
             default_style(task.priority.to_string().as_str()),
+            due_date(task),
             list(task, self.is_smart_list),
-            due_date(task)
         )
     }
 }
@@ -63,13 +62,15 @@ fn list(task: &Task, is_smart_list: bool) -> ANSIGenericString<str> {
 }
 
 fn due_date(task: &Task) -> ANSIGenericString<str> {
-    task.due_date
-        .map_or(ANSIGenericString::from(""), |due_date| {
-            if due_date.lt(&OffsetDateTime::now_local().date()) && !task.done {
-                Style::default().fg(Red)
-            } else {
-                Style::default()
-            }
-            .paint(format!("@{}", due_date.format("%F")))
-        })
+    let due_date = task
+        .due_date
+        .as_ref()
+        .map_or_else(|| "".to_string(), |due_date| format!("@{}", due_date));
+
+    if task.is_overdue() {
+        Style::default().fg(Red)
+    } else {
+        Style::default()
+    }
+    .paint(due_date)
 }

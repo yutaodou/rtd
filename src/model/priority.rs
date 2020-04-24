@@ -38,7 +38,7 @@ impl Default for Priority {
 
 #[cfg(test)]
 pub mod test {
-    use crate::task::{Priority, Task};
+    use crate::model::Priority;
     use std::str::FromStr;
 
     #[test]

@@ -1,10 +1,10 @@
+use std::ops::{Add, Deref};
 use std::str::FromStr;
-use std::ops::Add;
 use time::{Date, Duration, OffsetDateTime, Weekday};
 
-use crate::command::ToDoArgs;
+use std::fmt::{Display, Formatter, Result as FmtResult};
 
-#[derive(Debug, PartialOrd, PartialEq)]
+#[derive(Debug, PartialEq, PartialOrd)]
 pub struct SmartDate {
     date: Date,
 }
@@ -17,10 +17,25 @@ impl FromStr for SmartDate {
     }
 }
 
+impl Deref for SmartDate {
+    type Target = Date;
+
+    fn deref(&self) -> &Self::Target {
+        &self.date
+    }
+}
+
+impl Display for SmartDate {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        f.write_str(self.date.format("%F").as_str())?;
+        Ok(())
+    }
+}
+
 impl SmartDate {
     fn new<F>(input: &str, now: F) -> Result<SmartDate, String>
-        where
-            F: Fn() -> Date,
+    where
+        F: Fn() -> Date,
     {
         Date::parse(input, "%F")
             .or_else(|_| Date::parse(input, "%-Y%m%d"))
@@ -29,14 +44,15 @@ impl SmartDate {
     }
 
     fn parse<F>(input: &str, now: F) -> Result<SmartDate, String>
-        where F: Fn() -> Date
+    where
+        F: Fn() -> Date,
     {
         let today = now();
         match input.to_lowercase().as_str() {
             "mon" | "monday" => Some(Weekday::Monday),
-            "tue" | "tuesday" => Some(Weekday::Tuesday),
+            "tue" | "tues" | "tuesday" => Some(Weekday::Tuesday),
             "wed" | "wednesday" => Some(Weekday::Wednesday),
-            "thu" | "thursday" => Some(Weekday::Thursday),
+            "thu" | "thur" | "thursday" => Some(Weekday::Thursday),
             "fri" | "friday" => Some(Weekday::Friday),
             "sat" | "saturday" => Some(Weekday::Saturday),
             "sun" | "sunday" => Some(Weekday::Sunday),
@@ -44,28 +60,30 @@ impl SmartDate {
             "tomorrow" => Some(today.weekday().next()),
             _ => None,
         }
-            .map(|due_date_weekday| {
-                let today_weekday = today.weekday();
+        .map(|due_date_weekday| {
+            let today_weekday = today.weekday();
 
-                let diff_days = due_date_weekday.number_days_from_monday() as i64
-                    - today_weekday.number_days_from_monday() as i64;
+            let diff_days = due_date_weekday.number_days_from_monday() as i64
+                - today_weekday.number_days_from_monday() as i64;
 
-                let duration_offset = if diff_days >= 0 {
-                    Duration::days(diff_days)
-                } else {
-                    Duration::days(diff_days + 7)
-                };
+            let duration_offset = if diff_days >= 0 {
+                Duration::days(diff_days)
+            } else {
+                Duration::days(diff_days + 7)
+            };
 
-                SmartDate { date: today.add(duration_offset) }
-            })
-            .ok_or_else(|| format!("Invalid date: '{}'", input))
+            SmartDate {
+                date: today.add(duration_offset),
+            }
+        })
+        .ok_or_else(|| format!("I have no idea about: '{}'", input))
     }
 }
 
 #[cfg(test)]
 mod test {
-    use crate::task::SmartDate;
-    use time::{OffsetDateTime, Date};
+    use crate::model::SmartDate;
+    use time::Date;
 
     const NOW: fn() -> Date = || Date::parse("2020-04-24", "%F").unwrap();
 
@@ -96,7 +114,7 @@ mod test {
     }
 
     #[test]
-    fn test_smart_date_ISO_format() {
+    fn test_smart_date_iso_format() {
         let smart_date = SmartDate::new("2020-02-02", NOW).unwrap();
         assert_eq!(smart_date.date.as_ymd(), (2020, 2, 2));
 
@@ -107,6 +125,6 @@ mod test {
     #[test]
     fn test_invalid_smart_date() {
         let error = SmartDate::new("hello rust", NOW).unwrap_err();
-        assert_eq!(error, "Invalid date: 'hello rust'");
+        assert_eq!(error, "I have no idea about: 'hello rust'");
     }
 }

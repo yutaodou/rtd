@@ -27,13 +27,17 @@ impl ToDoArgs {
             None => Ok(None),
             Some(input) => Date::parse(&input, "%F")
                 .or_else(|_| Date::parse(&input, "%-Y%m%d"))
-                .or_else(|_| ToDoArgs::smart_date(&input))
+                .or_else(|_| ToDoArgs::smart_date(&input, || OffsetDateTime::now_local()))
                 .map(Some)
                 .map_err(|_| format!("Invalid due date: {}", input)),
         }
     }
 
-    fn smart_date(input: &str) -> Result<Date, String> {
+    fn smart_date<F>(input: &str, now: F) -> Result<Date, String>
+        where F: Fn() -> OffsetDateTime
+    {
+        let today = now().date();
+
         match input.to_lowercase().as_str() {
             "mon" | "monday" => Some(Weekday::Monday),
             "tue" | "tuesday" => Some(Weekday::Tuesday),
@@ -42,26 +46,25 @@ impl ToDoArgs {
             "fri" | "friday" => Some(Weekday::Friday),
             "sat" | "saturday" => Some(Weekday::Saturday),
             "sun" | "sunday" => Some(Weekday::Sunday),
-            "today" => Some(OffsetDateTime::now_local().weekday()),
-            "tomorrow" => Some(OffsetDateTime::now_local().weekday().next()),
+            "today" => Some(today.weekday()),
+            "tomorrow" => Some(today.weekday().next()),
             _ => None,
         }
-        .map(|due_date_weekday| {
-            let today = OffsetDateTime::now_local().date();
-            let today_weekday = today.weekday();
+            .map(|due_date_weekday| {
+                let today_weekday = today.weekday();
 
-            let diff_days = due_date_weekday.number_days_from_monday() as i64
-                - today_weekday.number_days_from_monday() as i64;
+                let diff_days = due_date_weekday.number_days_from_monday() as i64
+                    - today_weekday.number_days_from_monday() as i64;
 
-            let duration_offset = if diff_days >= 0 {
-                Duration::days(diff_days)
-            } else {
-                Duration::days(diff_days + 7)
-            };
+                let duration_offset = if diff_days >= 0 {
+                    Duration::days(diff_days)
+                } else {
+                    Duration::days(diff_days + 7)
+                };
 
-            OffsetDateTime::now_local().add(duration_offset).date()
-        })
-        .ok_or_else(|| format!("Unknown due date: {}", input))
+                today.add(duration_offset)
+            })
+            .ok_or_else(|| format!("Unknown due date: {}", input))
     }
 
     pub fn parse(args: &ArgMatches) -> ToDoArgs {

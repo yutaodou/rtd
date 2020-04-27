@@ -66,7 +66,7 @@ rtd done <todo-id>
 rtd done --unset <todo-id>
 rtd done -u <todo-id>
 ```
----
+
 ## Licence
 Copyright 2020 
 

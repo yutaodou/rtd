@@ -2,8 +2,8 @@ use clap::ArgMatches;
 use std::io::stdout;
 use std::result::Result;
 
-use crate::command::todo_args::ToDoArgs;
 use crate::command::Command;
+use crate::command::ToDoArgs;
 use crate::db::storage;
 use crate::model::{Priority, Task};
 use crate::view::single;

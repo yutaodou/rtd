@@ -16,7 +16,7 @@ fn open_connection() -> Connection {
     Connection::open(&database_file_path).unwrap()
 }
 
-pub fn update(task: &Task) -> Result<&Task, String> {
+pub fn update(task: &Task) -> Result<Task, String> {
     let conn = open_connection();
     conn.execute_named(
         "UPDATE todo SET title = :title, list = :list, done = :done, today = :today, priority = :priority, completed_at = :completed_at, due_date = :due_date WHERE id = :id",
@@ -29,8 +29,9 @@ pub fn update(task: &Task) -> Result<&Task, String> {
             (":id", &task.id),
             (":completed_at", &task.completed_at.map_or(0, |date| date.timestamp())),
             (":due_date", &task.due_date.as_ref().map_or("".to_string(), |date| date.format("%F"))),
-        ]).unwrap();
-    Ok(task)
+        ])
+        .map_err(|db_err|db_err.to_string())
+        .and_then(|_| get(task.id))
 }
 
 pub fn add(task: &Task) -> Result<Task, String> {
@@ -68,6 +69,17 @@ pub fn get(task_id: u32) -> Result<Task, String> {
     match todo {
         Ok(task) => Ok(task),
         _ => Err(format!("Task with id '{}' not found", task_id)),
+    }
+}
+
+pub fn delete(task_id: u32) -> Result<u32, String> {
+    let conn = open_connection();
+    let mut stmt = conn.prepare("DELETE FROM todo WHERE id = (?1)").unwrap();
+
+    match stmt.execute(params![task_id]) {
+        Ok(1) => Ok(task_id),
+        Ok(0) => Err(format!("Task with id '{}' not found", task_id)),
+        _ => Err(format!("Failed to delete task '{}'", task_id)),
     }
 }
 

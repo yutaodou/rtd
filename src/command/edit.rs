@@ -3,8 +3,7 @@ use std::borrow::Borrow;
 use std::io::stdout;
 use std::result::Result;
 
-use crate::command::todo_args::ToDoArgs;
-use crate::command::Command;
+use crate::command::{Command, ToDoArgs};
 use crate::db::storage;
 use crate::view::single;
 
@@ -59,7 +58,7 @@ impl Command for Edit {
                 Ok(task)
             })
             .and_then(|update_task| {
-                storage::update(&update_task).and_then(|task| single::render(task, &mut stdout()))
+                storage::update(&update_task).and_then(|task| single::render(&task, &mut stdout()))
             })
     }
 }

@@ -1,6 +1,6 @@
 [package]
 name = "rtd"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["yutaodou@gmail.com"]
 edition = "2018"
 

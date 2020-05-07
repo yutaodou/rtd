@@ -35,8 +35,6 @@ impl Command for Add {
             args.parse_priority()?.or(Some(Priority::Medium)).unwrap(),
             args.parse_due_date()?,
         );
-        print!("{:?}", args);
-
         if args.mark_for_today {
             new_task.mark_for_today();
         }

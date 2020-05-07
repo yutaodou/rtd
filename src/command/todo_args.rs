@@ -6,6 +6,7 @@ use crate::model::{Priority, SmartDate};
 #[derive(Debug)]
 pub struct ToDoArgs {
     pub list: Option<String>,
+    pub mark_for_today: bool,
     pub priority: Option<String>,
     pub due_date: Option<String>,
     pub free_args: Vec<String>,
@@ -33,6 +34,7 @@ impl ToDoArgs {
         let mut priority = None;
         let mut due_date = None;
         let mut free_args = vec![];
+        let mark_for_today = args.is_present("today");
 
         args.values_of("INPUT").unwrap().for_each(|arg| {
             if arg.starts_with(':') && arg.len() > 1 {
@@ -48,6 +50,7 @@ impl ToDoArgs {
 
         ToDoArgs {
             list,
+            mark_for_today,
             priority,
             due_date,
             free_args,
@@ -65,6 +68,7 @@ mod test {
     fn test_parse_due_date() {
         let mut add = ToDoArgs {
             list: None,
+            mark_for_today: false,
             due_date: Some("20200202".to_string()),
             priority: None,
             free_args: vec![],

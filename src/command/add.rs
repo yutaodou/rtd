@@ -29,12 +29,17 @@ impl Command for Add {
             return Err("Missing title for todo.".to_string());
         }
 
-        let new_task = Task::new(
+        let mut new_task = Task::new(
             title.map(|a| a.to_string()).unwrap(),
             args.list.clone().unwrap_or_else(|| "inbox".to_string()),
             args.parse_priority()?.or(Some(Priority::Medium)).unwrap(),
             args.parse_due_date()?,
         );
+        print!("{:?}", args);
+
+        if args.mark_for_today {
+            new_task.mark_for_today();
+        }
         let result = storage::add(&new_task)?;
         single::render(&result, &mut stdout())?;
         Ok(())

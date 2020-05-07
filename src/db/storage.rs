@@ -37,11 +37,12 @@ pub fn update(task: &Task) -> Result<Task, String> {
 pub fn add(task: &Task) -> Result<Task, String> {
     let conn = open_connection();
     conn.execute_named(
-        "INSERT INTO todo (title, list, priority, due_date, created_at) VALUES (:title, :list, :priority, :due_date, :created_at)",
+        "INSERT INTO todo (title, list, priority, today, due_date, created_at) VALUES (:title, :list, :priority, :today, :due_date, :created_at)",
         &[
             (":title", &task.title),
             (":list", &task.list.as_str()),
             (":priority", &task.priority.to_string()),
+            (":today", &task.today),
             (":created_at", &task.created_at.timestamp()),
             (":due_date", &task.due_date.as_ref().map_or("".to_string(), |date| date.format("%F"))),
         ],

@@ -41,14 +41,23 @@ fn main() {
                 ),
         )
         .subcommand(
-            SubCommand::with_name("add").about("Add a new task").arg(
-                Arg::with_name("INPUT")
-                    .help("<todo-title> :<list> +priority")
-                    .required(true)
-                    .index(1)
-                    .takes_value(true)
-                    .multiple(true),
-            ),
+            SubCommand::with_name("add")
+                .about("Add a new task")
+                .arg(
+                    Arg::with_name("INPUT")
+                        .help("<todo-title> :<list> +priority")
+                        .required(true)
+                        .index(1)
+                        .takes_value(true)
+                        .multiple(true),
+                )
+                .arg(
+                    Arg::with_name("today")
+                        .short("t")
+                        .long("today")
+                        .help("Mark task as today's priority")
+                        .takes_value(false),
+                ),
         )
         .subcommand(
             SubCommand::with_name("edit").about("Edit a todo").arg(

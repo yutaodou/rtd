@@ -45,7 +45,7 @@ fn main() {
                 .about("Add a new task")
                 .arg(
                     Arg::with_name("INPUT")
-                        .help("<todo-title> :<list> +priority")
+                        .help("<todo-title> :<list> +<priority> @<due-date>")
                         .required(true)
                         .index(1)
                         .takes_value(true)

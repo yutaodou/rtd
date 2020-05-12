@@ -4,6 +4,12 @@ Manage your todo in command line with `rtd` (Rust To Do)
 
 [![asciicast](https://asciinema.org/a/327535.svg)](https://asciinema.org/a/327535)
 
+## Install
+
+```
+cargo install rtd
+```
+
 ## Features
 ### Add a todo
 

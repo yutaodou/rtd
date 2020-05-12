@@ -1,8 +1,15 @@
 [package]
 name = "rtd"
-version = "0.2.0"
+description="Manage your todo in command line"
+homepage="https://github.com/yutaodou/rtd"
+repository="https://github.com/yutaodou/rtd"
+version = "0.3.0"
 authors = ["yutaodou@gmail.com"]
 edition = "2018"
+license = "Apache-2.0"
+readme = "README.md"
+keywords = ["task", "todo","command-line", "terminal", "cli"]
+categories = ["command-line-utilities"]
 
 [dependencies]
 rusqlite = "0.21.0"

@@ -34,7 +34,7 @@ impl<'a> Command for List<'a> {
 
         let render = list::Render {
             tasks: &result,
-            list: self.opts.value_of("name")
+            list: self.opts.value_of("name"),
         };
         render.render(&mut stdout())
     }

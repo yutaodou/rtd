@@ -3,7 +3,7 @@ use time::OffsetDateTime;
 use super::Priority;
 use super::SmartDate;
 
-pub const SMART_LISTS: &[&str; 1] = &["today"];
+pub const SMART_LISTS: [&str; 1] = ["today"];
 
 #[derive(Debug)]
 pub struct Task {

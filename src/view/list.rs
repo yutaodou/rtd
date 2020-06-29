@@ -1,59 +1,93 @@
+use crate::model::Task;
+use crate::prettytable::{format, row, Table};
 use ansi_term::Colour::Red;
 use ansi_term::{ANSIGenericString, Style};
-use std::io::{Error, Write};
+use std::io::{ Write};
 
-use crate::model::Task;
+use crate::model::SMART_LISTS;
 
 pub struct Render<'a> {
     pub tasks: &'a Vec<&'a Task>,
-    pub list: &'a str,
-    pub is_smart_list: bool,
+    pub list: Option<&'a str>
 }
 
 impl<'a> Render<'a> {
     pub fn render<W: Write>(self: &Self, w: &mut W) -> Result<(), String> {
-        if self.tasks.is_empty() {
-            match writeln!(w, "No tasks found for {}", self.list) {
-                Err(_) => Err(String::from("Failed to show list tasks")),
-                Ok(_) => Ok(()),
-            }
-        } else {
-            writeln!(w, "{}", self.list).unwrap();
-            let mut results = self.tasks.iter().map(|task| self.render_single(w, task));
-            match results.find(|result| result.is_err()) {
-                Some(Err(err)) => Err(err.to_string()),
-                _ => Ok(()),
-            }
+        let max_title_width = *self
+            .tasks
+            .iter()
+            .map(|task| task.title.len())
+            .max()
+            .get_or_insert(0);
+
+        match self.list {
+            Some(list) => self.render_list(w, self.tasks, list, max_title_width),
+            None => self.render_lists(w, max_title_width),
+        }
+
+        Ok(())
+    }
+
+    fn render_lists<W: Write>(self: &Self, w: &mut W, max_title_width: usize) {
+        let mut lists: Vec<&str> = self.tasks.iter().map(|task| task.list.as_str()).collect();
+        lists.sort();
+        lists.dedup();
+
+        for list in lists.iter() {
+            let tasks = self
+                .tasks
+                .iter()
+                .filter(|task| task.is_in_list(list))
+                .cloned()
+                .collect::<Vec<&Task>>();
+
+            self.render_list(w, &tasks, list, max_title_width);
         }
     }
 
-    fn render_single<W: Write>(self: &Self, w: &mut W, task: &Task) -> Result<(), Error> {
-        writeln!(
-            w,
-            "{:>4}. {} +{} {} {}",
-            task.id,
-            title(task),
-            default_style(task.priority.to_string().as_str()),
-            due_date(task),
-            list(task, self.is_smart_list),
-        )
+    fn render_list<W: Write>(self: &Self, w: &mut W, tasks: &[&Task], list: &str, max_title_width: usize) {
+        if tasks.is_empty() {
+            writeln!(w, "No tasks found for {}", list).unwrap();
+        } else {
+            let is_smart_list = SMART_LISTS.contains(&list.to_lowercase().as_str());
+
+            writeln!(w, "{}", list).unwrap();
+            let mut table = Table::new();
+            for task in tasks.iter() {
+                table.add_row(row![
+                    task_id(task),
+                    title(task, max_title_width),
+                    priority(task),
+                    due_date(task),
+                    task_list(task, is_smart_list)
+                ]);
+            }
+
+            let format = format::FormatBuilder::new().padding(1, 1).build();
+            table.set_format(format);
+            table.printstd();
+        }
     }
 }
 
-fn default_style(content: &str) -> ANSIGenericString<str> {
-    Style::default().paint(content)
+fn task_id(task: &Task) -> String {
+    format!("{}.", task.id)
 }
 
-fn title(task: &Task) -> ANSIGenericString<str> {
+fn priority(task: &Task) -> String {
+    format!("+{}", task.priority.to_string())
+}
+
+fn title(task: &Task, max_title_width: usize) -> ANSIGenericString<str> {
     if task.done {
         Style::new().strikethrough()
     } else {
         Style::default()
     }
-    .paint(&task.title)
+    .paint(format!("{:width$}", &task.title, width= max_title_width))
 }
 
-fn list(task: &Task, is_smart_list: bool) -> ANSIGenericString<str> {
+fn task_list(task: &Task, is_smart_list: bool) -> ANSIGenericString<str> {
     Style::default().paint(if is_smart_list {
         format!(":{}", task.list)
     } else {

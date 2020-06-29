@@ -21,7 +21,7 @@ impl<'a> Render<'a> {
             .get_or_insert(0);
 
         match self.list {
-            Some(list) => self.render_list(w, self.tasks, list, max_title_width),
+            Some(list) => self.render_list(w, list, max_title_width),
             None => self.render_lists(w, max_title_width),
         }
 
@@ -34,18 +34,18 @@ impl<'a> Render<'a> {
         lists.dedup();
 
         for list in lists.iter() {
-            let tasks = self
+            self.render_list(w, list, max_title_width);
+        }
+    }
+
+    fn render_list<W: Write>(self: &Self, w: &mut W, list: &str, max_title_width: usize) {
+        let tasks = self
                 .tasks
                 .iter()
                 .filter(|task| task.is_in_list(list))
                 .cloned()
                 .collect::<Vec<&Task>>();
 
-            self.render_list(w, &tasks, list, max_title_width);
-        }
-    }
-
-    fn render_list<W: Write>(self: &Self, w: &mut W, tasks: &[&Task], list: &str, max_title_width: usize) {
         if tasks.is_empty() {
             writeln!(w, "No tasks found for {}", list).unwrap();
         } else {
@@ -70,21 +70,22 @@ impl<'a> Render<'a> {
     }
 }
 
-fn task_id(task: &Task) -> String {
-    format!("{}.", task.id)
+fn task_id(task: &Task) -> ANSIGenericString<str> {
+        if task.done {
+        Style::new().strikethrough()
+    } else {
+        Style::default()
+    }
+    .paint(   format!("{}.", task.id))
+ 
 }
 
 fn priority(task: &Task) -> String {
     format!("+{}", task.priority.to_string())
 }
 
-fn title(task: &Task, max_title_width: usize) -> ANSIGenericString<str> {
-    if task.done {
-        Style::new().strikethrough()
-    } else {
-        Style::default()
-    }
-    .paint(format!("{:width$}", &task.title, width= max_title_width))
+fn title(task: &Task, max_title_width: usize) -> String {
+    format!("{:width$}", &task.title, width= max_title_width)
 }
 
 fn task_list(task: &Task, is_smart_list: bool) -> ANSIGenericString<str> {

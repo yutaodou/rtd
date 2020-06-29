@@ -1,0 +1,8 @@
+#!/bin/sh
+
+set -eu
+
+CURRENT_DIR=$(dirname "$0")
+cd "$CURRENT_DIR"/..
+
+cargo install --path . --bin rtd

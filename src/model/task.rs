@@ -32,7 +32,7 @@ impl Task {
             today: "".to_string(),
             list,
             priority,
-            created_at: OffsetDateTime::now(),
+            created_at: OffsetDateTime::now_utc(),
             completed_at: None,
             due_date,
         }
@@ -65,7 +65,7 @@ impl Task {
 
     pub fn mark_completed(self: &mut Self) {
         self.done = true;
-        self.completed_at = Some(OffsetDateTime::now());
+        self.completed_at = Some(OffsetDateTime::now_utc());
     }
 
     pub fn mark_uncompleted(self: &mut Self) {
@@ -93,7 +93,7 @@ impl Task {
     }
 
     fn today() -> String {
-        OffsetDateTime::now().format("%F")
+        OffsetDateTime::now_utc().format("%F")
     }
 
     pub fn is_overdue(&self) -> bool {

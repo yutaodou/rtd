@@ -12,12 +12,12 @@ keywords = ["task", "todo","command-line", "terminal", "cli"]
 categories = ["command-line-utilities"]
 
 [dependencies]
-rusqlite = "0.21.0"
-time = "0.2.9"
-ansi_term = "0.12"
-clap = "2.33.0"
-dirs = "2.0.2"
-anyhow = "1.0"
+rusqlite = "~0.21.0"
+time = "~0.2.16"
+ansi_term = "~0.12"
+clap = "~2.33.0"
+dirs = "~2.0.2"
+anyhow = "~1.0"
 prettytable-rs = "^0.8"
 
 [dependencies.migrant_lib]

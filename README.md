@@ -13,7 +13,7 @@ cargo install rtd
 ## Features
 ### Add a todo
 
-```
+```bash
 // Add a new to-do to inbox as low priority, which dues at 24th Apr 2020
 rtd add "This is a todo" :inbox +low  @2020-04-24
 

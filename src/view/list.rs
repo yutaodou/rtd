@@ -50,6 +50,7 @@ impl<'a> Render<'a> {
             for task in tasks.iter() {
                 table.add_row(row![
                     task_id(task),
+                    done(task),
                     title(task, width),
                     priority(task),
                     due_date(task),
@@ -72,13 +73,16 @@ fn max_title_width(tasks: &Vec<&Task>) -> usize {
         .get_or_insert(0)
 }
 
-fn task_id(task: &Task) -> ANSIGenericString<str> {
+fn done(task: &Task) -> String {
     if task.done {
-        Style::new().strikethrough()
+        String::from("✔")
     } else {
-        Style::default()
+        String::from("")
     }
-    .paint(format!("{}.", task.id))
+}
+
+fn task_id(task: &Task) -> String {
+    format!("{}.", task.id)
 }
 
 fn priority(task: &Task) -> String {

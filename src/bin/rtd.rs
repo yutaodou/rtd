@@ -1,6 +1,6 @@
 extern crate clap;
 
-use clap::{App, Arg, ArgMatches, SubCommand};
+use clap::{App, Arg, ArgMatches, SubCommand, crate_version, crate_name};
 use std::process::exit;
 
 use rtd::command::{Add, Command, Delete, Done, Edit, List, Today};
@@ -9,8 +9,8 @@ use rtd::db::migration;
 fn main() {
     migration::migrate().unwrap();
 
-    let opts = App::new("Rust To Do")
-        .version("v0.1")
+    let opts = App::new(crate_name!())
+        .version(crate_version!())
         .about("Manage todos in command line")
         .subcommand(
             SubCommand::with_name("list")

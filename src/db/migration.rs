@@ -15,7 +15,10 @@ fn create_database_dir() -> AnyResult<()> {
         .parent()
         .map(|database_file_dir| {
             if !database_file_dir.exists() {
-                DirBuilder::new().create(database_file_dir).unwrap();
+                DirBuilder::new()
+                    .recursive(true)
+                    .create(database_file_dir)
+                    .unwrap();
             }
         })
         .ok_or_else(|| AnyError::msg("Failed to create database dir."))

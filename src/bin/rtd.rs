@@ -1,6 +1,6 @@
 extern crate clap;
 
-use clap::{App, Arg, ArgMatches, SubCommand, crate_version, crate_name};
+use clap::{crate_name, crate_version, App, Arg, ArgMatches, SubCommand};
 use std::process::exit;
 
 use rtd::command::{Add, Command, Delete, Done, Edit, List, Today};

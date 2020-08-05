@@ -1,20 +1,24 @@
-use std::io::Write;
-
 use crate::model::Task;
+use prettytable::{Table, format, Row};
+use crate::view::formatter::Formatter;
 
-pub fn render<W: Write>(task: &Task, w: &mut W) -> Result<(), String> {
-    let done = if task.done { "x" } else { "-" };
-    let result = format!(
-        "[{}] {}. {} :{} +{}{}",
-        done,
-        task.id,
-        task.title,
-        task.list,
-        task.priority.to_string(),
-        task.due_date
-            .as_ref()
-            .map_or("".to_string(), |date| format!(" @{}", date)),
-    );
-    writeln!(w, "{}", result).unwrap();
+pub fn render(task: &Task) -> Result<(), String> {
+    let mut table = Table::new();
+    let formatter = Formatter::new(task.clone());
+
+    let mut row = Row::empty();
+    row.add_cell(cell!(formatter.task_id()));
+    if task.done { row.add_cell(cell!(formatter.done())) };
+    row.add_cell(cell!(formatter.title(None)));
+    row.add_cell(cell!(formatter.priority()));
+    row.add_cell(cell!(formatter.due_date()));
+    row.add_cell(cell!(formatter.task_list(false)));
+
+    table.add_row(row);
+
+    let format = format::FormatBuilder::new().padding(1, 1).build();
+    table.set_format(format);
+    table.printstd();
+
     Ok(())
 }

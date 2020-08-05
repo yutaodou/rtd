@@ -47,14 +47,14 @@ impl<'a> Render<'a> {
             writeln!(w, "{}", list).unwrap();
             let mut table = Table::new();
             for task in tasks.iter() {
-                let formatter = Formatter::new(task);
+                let formatter = Formatter::new(task.clone());
                 table.add_row(row![
                     formatter.task_id(),
                     formatter.done(),
-                    formatter.title(),
+                    formatter.title(Some(width)),
                     formatter.priority(),
                     formatter.due_date(),
-                    formatter.list(is_smart_list)
+                    formatter.task_list(is_smart_list)
                 ]);
             }
 

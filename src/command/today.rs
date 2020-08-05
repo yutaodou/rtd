@@ -1,4 +1,3 @@
-use std::io::stdout;
 use std::result::Result;
 
 use clap::ArgMatches;
@@ -39,7 +38,7 @@ impl<'a> Command for Today<'a> {
     fn run(self: Self) -> Result<(), String> {
         self.process(
             self.args.values_of("INPUT").unwrap().collect(),
-            Box::new(|task| single::render(&task, &mut stdout()).unwrap()),
+            Box::new(|task| single::render(&task).unwrap()),
         )
     }
 }

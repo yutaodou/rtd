@@ -1,5 +1,4 @@
 use clap::ArgMatches;
-use std::io::stdout;
 use std::result::Result;
 
 use crate::command::Command;
@@ -39,7 +38,7 @@ impl Command for Add {
             new_task.mark_for_today();
         }
         let result = storage::add(&new_task)?;
-        single::render(&result, &mut stdout())?;
+        single::render(&result)?;
         Ok(())
     }
 }

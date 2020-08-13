@@ -75,7 +75,7 @@ impl Task {
 
     pub fn is_in_list(&self, list: &str) -> bool {
         match list.to_lowercase().as_str() {
-            "today" => self.is_marked_for_today(),
+            "today" => self.is_marked_for_today() || self.is_due_today(),
             _ => self.list.to_lowercase().eq(list.to_lowercase().as_str()),
         }
     }
@@ -92,6 +92,10 @@ impl Task {
         self.today.eq(Task::today().as_str())
     }
 
+    pub fn is_due_today (&self) -> bool {
+        self.due_date.as_ref().map(|due_date| due_date.is_today()).unwrap_or(false)
+    }
+
     fn today() -> String {
         OffsetDateTime::now_utc().format("%F")
     }
@@ -99,9 +103,9 @@ impl Task {
     pub fn is_overdue(&self) -> bool {
         !self.done
             && self.due_date.as_ref().map_or_else(
-                || false,
-                |due_date| OffsetDateTime::now_local().date().gt(&due_date),
-            )
+            || false,
+            |due_date| OffsetDateTime::now_local().date().gt(&due_date),
+        )
     }
 }
 

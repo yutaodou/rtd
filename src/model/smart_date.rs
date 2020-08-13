@@ -89,7 +89,7 @@ impl SmartDate {
         .ok_or_else(|| format!("I have no idea about: '{}'", input))
     }
 
-    fn is_today(&self) -> bool {
+    pub fn is_today(&self) -> bool {
         self.now.eq(&self.date)
     }
 

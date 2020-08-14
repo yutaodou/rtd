@@ -10,6 +10,16 @@ Manage your todo in command line with `rtd` (Rust To Do)
 cargo install rtd
 ```
 
+## Data
+Data are stored in a sqlite database file locally:
+- Linux
+    - $XDG_DATA_HOME/rtc, or
+    - $HOME/.local/share/rtd
+- Windows
+    - FOLDERID_RoamingAppData/rtd
+- Mac
+    - $HOME/Library/Application Support/rtd
+
 ## Features
 ### Add a todo
 

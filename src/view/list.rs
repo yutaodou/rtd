@@ -2,8 +2,8 @@ use crate::model::Task;
 use crate::prettytable::{format, Table};
 use std::io::Write;
 
-use crate::model::SMART_LISTS;
 use super::formatter::Formatter;
+use crate::model::SMART_LISTS;
 
 pub struct Render<'a> {
     pub tasks: &'a Vec<&'a Task>,
@@ -42,12 +42,12 @@ impl<'a> Render<'a> {
             writeln!(w, "No tasks found for {}", list).unwrap();
         } else {
             let is_smart_list = SMART_LISTS.contains(&list.to_lowercase().as_str());
-            let width: usize = max_width.unwrap_or(max_title_width(&tasks));
+            let width: usize = max_width.unwrap_or_else(|| max_title_width(&tasks));
 
             writeln!(w, "{}", list).unwrap();
             let mut table = Table::new();
             for task in tasks.iter() {
-                let formatter = Formatter::new(task.clone());
+                let formatter = Formatter::new(task);
                 table.add_row(row![
                     formatter.task_id(),
                     formatter.done(),
@@ -65,7 +65,7 @@ impl<'a> Render<'a> {
     }
 }
 
-fn max_title_width(tasks: &Vec<&Task>) -> usize {
+fn max_title_width(tasks: &[&Task]) -> usize {
     *tasks
         .iter()
         .map(|task| task.title.len())

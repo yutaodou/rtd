@@ -92,8 +92,11 @@ impl Task {
         self.today.eq(Task::today().as_str())
     }
 
-    pub fn is_due_today (&self) -> bool {
-        self.due_date.as_ref().map(|due_date| due_date.is_today()).unwrap_or(false)
+    pub fn is_due_today(&self) -> bool {
+        self.due_date
+            .as_ref()
+            .map(|due_date| due_date.is_today())
+            .unwrap_or(false)
     }
 
     fn today() -> String {
@@ -103,9 +106,9 @@ impl Task {
     pub fn is_overdue(&self) -> bool {
         !self.done
             && self.due_date.as_ref().map_or_else(
-            || false,
-            |due_date| OffsetDateTime::now_local().date().gt(&due_date),
-        )
+                || false,
+                |due_date| OffsetDateTime::now_local().date().gt(&due_date),
+            )
     }
 }
 

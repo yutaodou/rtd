@@ -1,13 +1,13 @@
-use std::string::ToString;
 use crate::model::Task;
+use std::string::ToString;
 
 pub struct Formatter<'a> {
-    task: &'a Task
+    task: &'a Task,
 }
 
 impl<'a> Formatter<'a> {
     pub fn new(task: &'a Task) -> Self {
-        return Formatter { task };
+        Formatter { task }
     }
 
     pub fn done(&self) -> String {

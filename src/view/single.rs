@@ -1,14 +1,16 @@
 use crate::model::Task;
-use prettytable::{Table, format, Row};
 use crate::view::formatter::Formatter;
+use prettytable::{format, Row, Table};
 
 pub fn render(task: &Task) -> Result<(), String> {
     let mut table = Table::new();
-    let formatter = Formatter::new(task.clone());
+    let formatter = Formatter::new(task);
 
     let mut row = Row::empty();
     row.add_cell(cell!(formatter.task_id()));
-    if task.done { row.add_cell(cell!(formatter.done())) };
+    if task.done {
+        row.add_cell(cell!(formatter.done()))
+    };
     row.add_cell(cell!(formatter.title(None)));
     row.add_cell(cell!(formatter.priority()));
     row.add_cell(cell!(formatter.due_date()));
